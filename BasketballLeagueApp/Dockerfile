@@ -8,15 +8,14 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copiar proyecto y restaurar dependencias
-COPY BasketballLeagueApp/BasketballLeagueApp.csproj BasketballLeagueApp/
-RUN dotnet restore BasketballLeagueApp/BasketballLeagueApp.csproj
+# Copiar el archivo .csproj
+COPY BasketballLeagueApp.csproj ./
+RUN dotnet restore BasketballLeagueApp.csproj
 
-# Copiar todo el código
-COPY BasketballLeagueApp/. ./BasketballLeagueApp
+# Copiar el resto del proyecto
+COPY . ./
 
 # Publicar
-WORKDIR /src/BasketballLeagueApp
 RUN dotnet publish -c Release -o /app/publish
 
 # Imagen final
@@ -26,11 +25,8 @@ WORKDIR /app
 # Copiar aplicación publicada
 COPY --from=build /app/publish .
 
-# Añadir permisos para ejecutar libwkhtmltox (para DinkToPdf)
+# Instalar dependencias para DinkToPdf (wkhtmltopdf)
 RUN apt-get update && apt-get install -y libgdiplus libc6-dev libx11-dev libxext6 libxrender1 libfontconfig1 libfreetype6 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Copiar wkhtmltox si lo tienes local (opcional, o usar desde código)
-# COPY libwkhtmltox.so /app/
 
 ENTRYPOINT ["dotnet", "BasketballLeagueApp.dll"]

@@ -48,7 +48,12 @@ else
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Solo forzar HTTPS si NO estás dentro de contenedor/Render
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Production"))
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
