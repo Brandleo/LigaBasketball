@@ -1,0 +1,268 @@
+﻿@model X.PagedList.IPagedList<BasketballLeagueApp.Models.jugadores>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Jugadores";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<!-- Mensajes -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="text-primary">
+                        <i class="bi bi-people-fill me-2"></i>Gestión de Jugadores
+                    </h2>
+                    <p class="text-muted mb-0">Administra los jugadores registrados en la liga</p>
+                </div>
+                <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="bi bi-plus-lg me-2"></i>Nuevo Jugador
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @using (Html.BeginForm("Index", "jugadores", FormMethod.Get, new { @class = "row g-3", id = "filtrosForm" }))
+                    {
+                        <div class="col-md-3">
+                            <label class="form-label"><i class="bi bi-search me-1"></i>Nombre</label>
+                            <input type="text" name="searchString" class="form-control" placeholder="Buscar por nombre..."
+                                   value="@Context.Request.Query["searchString"]" oninput="enviarFormulario()" />
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Equipo</label>
+                            <select name="equipoFiltro" class="form-control" asp-items="ViewBag.Equipos" onchange="enviarFormulario()">
+                                <option value="">Todos los Equipos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Posición</label>
+                            <select name="posicionFiltro" class="form-control" asp-items="ViewBag.Posiciones" onchange="enviarFormulario()">
+                                <option value="">Todas las Posiciones</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Estado</label>
+                            <select name="estadoFiltro" class="form-control" asp-items="ViewBag.Estados" onchange="enviarFormulario()">
+                                <option value="">Todos los Estados</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Nacionalidad</label>
+                            <select name="nacionalidadFiltro" class="form-control" asp-items="ViewBag.Nacionalidades" onchange="enviarFormulario()">
+                                <option value="">Todas las Nacionalidades</option>
+                            </select>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de jugadores -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Listado de Jugadores</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="bi bi-image me-1"></i>Foto</th>
+                                        <th>Nombre</th>
+                                        <th>Equipo</th>
+                                        <th>Posición</th>
+                                        <th>Estatura</th>
+                                        <th>Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var jugador in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @if (!string.IsNullOrEmpty(jugador.img))
+                                                {
+                                                    <img src="@jugador.img" class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;" />
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-person-circle text-muted" style="font-size: 2rem;"></i>
+                                                }
+                                            </td>
+                                            <td>
+                                                <strong class="text-primary">@jugador.nombre @jugador.apellido</strong>
+                                                <br /><small class="text-muted">@jugador.nacionalidad</small>
+                                            </td>
+                                            <td>@jugador.equipo?.nombre</td>
+                                            <td>@jugador.posicion</td>
+                                            <td>@jugador.estatura cm</td>
+                                            <td>
+                                                @if (jugador.estado == "activo")
+                                                {
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i>Activo</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger"><i class="bi bi-x-circle me-1"></i>Inactivo</span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-action="Details" asp-route-id="@jugador.id" class="btn btn-outline-info" title="Detalles">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@jugador.id" class="btn btn-outline-warning" title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <a asp-action="Delete" asp-route-id="@jugador.id" class="btn btn-outline-danger" title="Finalizar Contrato">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-person-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No se encontraron jugadores</h4>
+                            <p class="text-muted">Modifica los filtros o registra un nuevo jugador.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginación -->
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            @Html.PagedListPager(Model, page => Url.Action("Index", new
+                {
+                    page,
+                    searchString = Context.Request.Query["searchString"],
+                    equipoFiltro = Context.Request.Query["equipoFiltro"],
+                    posicionFiltro = Context.Request.Query["posicionFiltro"],
+                    estadoFiltro = Context.Request.Query["estadoFiltro"],
+                    nacionalidadFiltro = Context.Request.Query["nacionalidadFiltro"]
+                }),
+                     new PagedListRenderOptions
+            {
+                UlElementClasses = new[] { "pagination", "justify-content-center" },
+                LiElementClasses = new[] { "page-item" },
+                PageClasses = new[] { "page-link" }
+            })
+        </div>
+    </div>
+</div>
+
+<script>
+    function enviarFormulario() {
+        document.getElementById("filtrosForm").submit();
+    }
+</script>
+
+
+<style>
+    .table thead th {
+        vertical-align: middle;
+    }
+
+    .table tbody td {
+        vertical-align: middle;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+        border-radius: 0.25rem;
+    }
+
+    .btn-outline-info,
+    .btn-outline-warning,
+    .btn-outline-danger {
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #0dcaf0;
+        color: white;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        color: white;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .alert {
+        border-left: 4px solid;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+
+    .pagination .page-link {
+        border-radius: 0.25rem;
+    }
+
+    .pagination .active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+    }
+
+    .form-label i {
+        color: #0d6efd;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
+        border-radius: 0.4rem;
+    }
+</style>
+
+
+}

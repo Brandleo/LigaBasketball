@@ -1,0 +1,80 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteClasificacionVM
+@{
+    ViewData["Title"] = "Reporte de Clasificación de Equipos";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="bi bi-trophy-fill me-2"></i>@ViewData["Title"]</h4>
+            @if (Model.Filas != null && Model.Filas.Any())
+            {
+                <form method="post" asp-controller="Reportes" asp-action="GenerarPDF">
+                    <input type="hidden" name="temporadaId" value="@Model.TemporadaSeleccionada" />
+                    <button type="submit" class="btn btn-danger">Exportar PDF</button>
+                </form>
+            }
+        </div>
+        <div class="card-body">
+            <form asp-action="Clasificacion" method="post" class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="TemporadaSeleccionada" class="form-label">Temporada:</label>
+                    <select asp-for="TemporadaSeleccionada" asp-items="Model.TemporadasDisponibles" class="form-select" required>
+                        <option value="">Seleccione una temporada</option>
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100"><i class="bi bi-search"></i> Ver Clasificación</button>
+                </div>
+            </form>
+
+
+            @if (Model.Filas != null && Model.Filas.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped align-middle text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Equipo</th>
+                                <th>PJ</th>
+                                <th>PG</th>
+                                <th>PP</th>
+                                <th>PF</th>
+                                <th>PC</th>
+                                <th>Dif</th>
+                                <th>Pts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var pos = 1;
+                                foreach (var fila in Model.Filas.OrderByDescending(f => f.PuntosTotales))
+                                {
+                                    <tr>
+                                        <td>@pos</td>
+                                        <td>@fila.Equipo</td>
+                                        <td>@fila.PartidosJugados</td>
+                                        <td>@fila.PartidosGanados</td>
+                                        <td>@fila.PartidosPerdidos</td>
+                                        <td>@fila.PuntosFavor</td>
+                                        <td>@fila.PuntosContra</td>
+                                        <td>@fila.Diferencia</td>
+                                        <td><strong>@fila.PuntosTotales</strong></td>
+                                    </tr>
+                                    pos++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else if (Model.TemporadaSeleccionada > 0)
+            {
+                <div class="alert alert-warning mt-3">No hay datos de partidos para la temporada seleccionada.</div>
+            }
+        </div>
+
+    </div>
+</div>

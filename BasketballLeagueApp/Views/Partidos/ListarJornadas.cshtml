@@ -1,0 +1,482 @@
+﻿@model IEnumerable<BasketballLeagueApp.Models.jornadas>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    int? temporadaSeleccionada = ViewBag.TemporadaSeleccionada as int?;
+}
+
+<style>
+    .season-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .season-selector {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border: 1px solid #f0f0f0;
+        margin-bottom: 2rem;
+    }
+    
+    .action-buttons-container {
+        background: linear-gradient(45deg, #f8f9ff, #ffffff);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px dashed #e0e6ed;
+        position: relative;
+    }
+    
+    .action-buttons-container::before {
+        content: "⚡ Acciones Rápidas";
+        position: absolute;
+        top: -12px;
+        left: 20px;
+        background: #667eea;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .btn-action {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0.25rem;
+    }
+    
+    .btn-action::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-action:hover::before {
+        left: 100%;
+    }
+    
+    .btn-playoffs {
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+    }
+    
+    .btn-playoffs:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        color: white;
+    }
+    
+    .btn-semifinals {
+        background: linear-gradient(45deg, #ffa726, #fb8c00);
+        color: white;
+        box-shadow: 0 4px 15px rgba(255, 167, 38, 0.4);
+    }
+    
+    .btn-semifinals:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 167, 38, 0.6);
+        color: white;
+    }
+    
+    .btn-final {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .btn-final:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        color: white;
+    }
+    
+    .btn-simulate {
+        background: linear-gradient(45deg, #2ed573, #1dd1a1);
+        color: white;
+        box-shadow: 0 4px 15px rgba(46, 213, 115, 0.4);
+    }
+    
+    .btn-simulate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(46, 213, 115, 0.6);
+        color: white;
+    }
+    
+    .jornadas-table {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        border: none;
+    }
+    
+    .jornadas-table thead {
+        background: linear-gradient(45deg, #2c3e50, #34495e);
+    }
+    
+    .jornadas-table thead th {
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.85rem;
+    }
+    
+    .jornadas-table tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .jornadas-table tbody tr:hover {
+        background: linear-gradient(45deg, #f8f9ff, #ffffff);
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .jornadas-table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+    }
+    
+    .jornada-number {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin: 0 auto;
+    }
+    
+    .date-badge {
+        background: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        color: #495057;
+        border: 1px solid #e9ecef;
+    }
+    
+    .btn-ver-partidos {
+        background: linear-gradient(45deg, #4facfe, #00f2fe);
+        border: none;
+        border-radius: 20px;
+        padding: 8px 20px;
+        color: white;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-ver-partidos:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .alert-custom {
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .alert-success-custom {
+        background: linear-gradient(45deg, #d4edda, #c3e6cb);
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+    
+    .alert-danger-custom {
+        background: linear-gradient(45deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .alert-info-custom {
+        background: linear-gradient(45deg, #d1ecf1, #bee5eb);
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    .season-name {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        margin-left: 0.5rem;
+    }
+    
+    .form-select-custom {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-select-custom:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .no-data-container {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(45deg, #f8f9ff, #ffffff);
+        border-radius: 12px;
+        margin-top: 2rem;
+    }
+    
+    .no-data-icon {
+        font-size: 4rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header Principal -->
+    <div class="season-header fade-in-up">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">🏀 Gestión de Jornadas</h1>
+                <p class="mb-0 opacity-75">Administra las jornadas y playoffs de tus temporadas</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="d-flex justify-content-end align-items-center">
+                    <i class="fas fa-calendar-alt" style="font-size: 3rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes de Estado -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success-custom fade-in-up">
+            <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+        </div>
+        <script>
+            setTimeout(() => window.location.href = '@Url.Action("ListarJornadas", "Partidos")', 3600);
+        </script>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger-custom fade-in-up">
+            <i class="fas fa-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- Selector de Temporada -->
+    <div class="season-selector fade-in-up">
+        @using (Html.BeginForm("ListarJornadas", "Partidos", FormMethod.Get))
+        {
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label for="temporadaId" class="form-label fw-bold text-primary">
+                        <i class="fas fa-trophy me-2"></i>Temporada
+                    </label>
+                </div>
+                <div class="col-md-9">
+                    @Html.DropDownList("temporadaId", ViewBag.Temporadas as SelectList, "🏆 Seleccionar Temporada", new
+                    {
+                        @class = "form-select form-select-custom",
+                        onchange = "this.form.submit()"
+                    })
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Botones de Acción -->
+    @if (temporadaSeleccionada.HasValue)
+    {
+        <div class="action-buttons-container fade-in-up">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    @using (Html.BeginForm("PlayOff", "temporadas", FormMethod.Post, new { @class = "d-block" }))
+                    {
+                        @Html.Hidden("temporadaId", temporadaSeleccionada.Value)
+                        <button type="submit" class="btn btn-action btn-playoffs w-100"
+                                onclick="return confirm('🏀 ¿Generar los Cuartos de Final?');">
+                            <i class="fas fa-medal me-2"></i>Cuartos de Final
+                        </button>
+                    }
+                </div>
+                <div class="col-md-3">
+                    @using (Html.BeginForm("GenerarSemifinales", "temporadas", FormMethod.Post, new { @class = "d-block" }))
+                    {
+                        @Html.Hidden("temporadaId", temporadaSeleccionada.Value)
+                        <button type="submit" class="btn btn-action btn-semifinals w-100"
+                                onclick="return confirm('🥉 ¿Generar las Semifinales?');">
+                            <i class="fas fa-trophy me-2"></i>Semifinales
+                        </button>
+                    }
+                </div>
+                <div class="col-md-3">
+                    @using (Html.BeginForm("GenerarFinal", "temporadas", FormMethod.Post, new { @class = "d-block" }))
+                    {
+                        @Html.Hidden("temporadaId", temporadaSeleccionada.Value)
+                        <button type="submit" class="btn btn-action btn-final w-100"
+                                onclick="return confirm('🥇 ¿Generar la Final?');">
+                            <i class="fas fa-crown me-2"></i>Final
+                        </button>
+                    }
+                </div>
+                <div class="col-md-3">
+                    @using (Html.BeginForm("SimularPartidosTemporada", "temporadas", FormMethod.Post, new { @class = "d-block" }))
+                    {
+                        @Html.Hidden("temporadaId", temporadaSeleccionada.Value)
+                        <button type="submit" class="btn btn-action btn-simulate w-100"
+                                onclick="return confirm('⚡ ¿Simular todos los partidos?');">
+                            <i class="fas fa-play me-2"></i>Simular temporada regular
+                        </button>
+                    }
+                </div>  
+                <div class="col-md-3">
+                    @using (Html.BeginForm("SimularCuartos", "temporadas", FormMethod.Post, new { @class = "d-block" }))
+                    {
+                        @Html.Hidden("temporadaId", temporadaSeleccionada.Value)
+                        <button type="submit" class="btn btn-action btn-simulate w-100"
+                                onclick="return confirm('⚡ ¿Simular todos los partidos?');">
+                            <i class="fas fa-play me-2"></i>Simular temporada Cuartos
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Título de la Temporada Seleccionada -->
+    @if (!string.IsNullOrEmpty(ViewBag.NombreTemporada))
+    {
+        <div class="text-center mb-4 fade-in-up">
+            <h3 class="text-dark">
+                Jornadas de <span class="season-name">@ViewBag.NombreTemporada</span>
+            </h3>
+        </div>
+    }
+
+    <!-- Tabla de Jornadas -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="table-responsive fade-in-up">
+            <table class="table jornadas-table">
+                <thead>
+                    <tr>
+                        <th class="text-center">Jornada</th>
+                        <th class="text-center">Fecha Inicio</th>
+                        <th class="text-center">Fecha Fin</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var jornada in Model)
+                    {
+                        <tr>
+                            <td class="text-center">
+                                <div class="jornada-number">
+                                    @jornada.numero_jornada
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="date-badge">
+                                    <i class="fas fa-calendar-check me-1"></i>
+                                    @jornada.fecha_inicio.ToShortDateString()
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <span class="date-badge">
+                                    <i class="fas fa-calendar-times me-1"></i>
+                                    @jornada.fecha_fin.ToShortDateString()
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a asp-action="VerPartidos"
+                                   asp-route-jornadaId="@jornada.id"
+                                   class="btn-ver-partidos">
+                                    <i class="fas fa-eye me-1"></i>Ver Partidos
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (temporadaSeleccionada.HasValue)
+    {
+        <div class="no-data-container fade-in-up">
+            <div class="no-data-icon">📅</div>
+            <h4 class="text-muted">No hay jornadas registradas</h4>
+            <p class="text-muted">Esta temporada aún no tiene jornadas configuradas.</p>
+        </div>
+    }
+</div>
+
+<!-- Font Awesome para los iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    // Animaciones al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const elements = document.querySelectorAll('.fade-in-up');
+        elements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+
+    // Efectos hover para las filas de la tabla
+    document.querySelectorAll('.jornadas-table tbody tr').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+        });
+        
+        row.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+</script>

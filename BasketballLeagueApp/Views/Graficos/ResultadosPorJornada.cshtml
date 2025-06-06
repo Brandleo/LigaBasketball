@@ -1,0 +1,101 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+@model GraficoResultadosPorJornadaVM
+@{
+    ViewData["Title"] = "Resultados por Jornada";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="filtros-form">
+    <label>Temporada:</label>
+    <select id="temporada">
+        @foreach (var item in Model.TemporadasDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <label>Equipo:</label>
+    <select id="equipo">
+        @foreach (var item in Model.EquiposDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <button type="submit">Actualizar</button>
+</form>
+
+<canvas id="graficoLineas" width="800" height="400"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const form = document.getElementById("filtros-form");
+        const ctx = document.getElementById("graficoLineas").getContext("2d");
+        let chart;
+
+        async function cargarGrafico() {
+            const temporada = document.getElementById("temporada").value;
+            const equipo = document.getElementById("equipo").value;
+
+            const res = await fetch(`/Graficos/ObtenerResultadosPorJornada?temporadaId=${temporada}&equipoId=${equipo}`, {
+                method: 'POST'
+            });
+
+            const data = await res.json();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos por jornada',
+                        data: data.datos,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolución de Puntos por Jornada'
+                        }
+                    }
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGrafico();
+        });
+
+        window.onload = cargarGrafico;
+    </script>
+
+    <script>
+        document.getElementById("temporada").addEventListener("change", async function () {
+            const temporadaId = this.value;
+            const equipoSelect = document.getElementById("equipo");
+            equipoSelect.innerHTML = ""; // limpiar
+
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await res.json();
+
+            data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.text = item.text;
+                equipoSelect.appendChild(option);
+            });
+        });
+    </script>
+
+}

@@ -1,0 +1,303 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteCalendarioJornadaVM
+@{
+    ViewData["Title"] = "Calendario Jornadas";
+}
+
+<style>
+    .gradient-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+    
+    .jornada-card {
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background: white;
+    }
+    
+    .jornada-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+    
+    .jornada-header {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        border: none;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .jornada-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 200%;
+        background: rgba(255,255,255,0.1);
+        transform: rotate(45deg);
+        transition: all 0.3s ease;
+    }
+    
+    .jornada-card:hover .jornada-header::before {
+        right: -40%;
+    }
+    
+    .jornada-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .date-range {
+        font-size: 0.95rem;
+        opacity: 0.9;
+        font-weight: 500;
+    }
+    
+    .partido-row {
+        transition: all 0.3s ease;
+        border-radius: 8px;
+    }
+    
+    .partido-row:hover {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        transform: scale(1.02);
+    }
+    
+    .vs-badge {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+        color: #333;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+        margin: 0 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .time-badge {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: #333;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .date-badge {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #333;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    
+    .filter-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-modern {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 30px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+    
+    .form-select-modern {
+        border-radius: 15px;
+        border: 2px solid #e9ecef;
+        padding: 12px 20px;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-select-modern:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        transform: translateY(-1px);
+    }
+    
+    .no-matches-card {
+        text-align: center;
+        padding: 40px;
+        background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+        border-radius: 15px;
+        color: #333;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .badge-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .match-details {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .team-names {
+        flex: 1;
+        min-width: 200px;
+    }
+    
+    @@media (max-width: 768px) {
+        .match-details {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .badge-container {
+            justify-content: center;
+        }
+        
+        .team-names {
+            min-width: auto;
+            text-align: center;
+        }
+        
+        .jornada-number {
+            font-size: 1.2rem;
+        }
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- Filtro de Temporada -->
+    <div class="card filter-card shadow-lg mb-4">
+        <div class="card-body p-4">
+            <form asp-action="CalendarioJornadas" method="post">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label class="form-label text-white fw-bold mb-3">
+                            <i class="fas fa-calendar-alt me-2"></i>Seleccionar Temporada
+                        </label>
+                        <select asp-for="TemporadaSeleccionada" asp-items="Model.Temporadas" class="form-select form-select-modern">
+                            <option value="">🏀 Seleccione una temporada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-modern text-white w-100">
+                            <i class="fas fa-search me-2"></i>Ver Calendario
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    @if (Model.Jornadas != null && Model.Jornadas.Any())
+    {
+        <div class="row">
+            @foreach (var jornada in Model.Jornadas)
+            {
+                <div class="col-12 mb-4">
+                    <div class="card jornada-card shadow-lg">
+                        <div class="card-header jornada-header text-white">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <div class="jornada-number">
+                                    🏆 Jornada @jornada.NumeroJornada
+                                </div>
+                                <div class="date-range">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    @jornada.FechaInicio.ToString("dd/MM/yyyy") - @jornada.FechaFin.ToString("dd/MM/yyyy")
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            @if (jornada.Partidos.Any())
+                            {
+                                @foreach (var partido in jornada.Partidos)
+                                {
+                                    <div class="partido-row p-3 border-bottom">
+                                        <div class="match-details">
+                                            <div class="team-names">
+                                                <strong>@partido.Equipos</strong>
+                                            </div>
+                                            <div class="badge-container">
+                                                <span class="date-badge">
+                                                    <i class="fas fa-calendar-day me-1"></i>
+                                                    @partido.Fecha.ToString("dd/MM/yyyy")
+                                                </span>
+                                                <span class="time-badge">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    @partido.Hora.ToString("HH:mm")
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="no-matches-card m-3">
+                                    <i class="fas fa-basketball-ball fa-2x mb-3"></i>
+                                    <h5>No hay partidos programados</h5>
+                                    <p class="mb-0">Esta jornada aún no tiene partidos asignados.</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (Model.TemporadaSeleccionada != null)
+    {
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h4>No se encontraron jornadas</h4>
+            <p>No hay jornadas disponibles para la temporada seleccionada.</p>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-basketball-ball"></i>
+            <h4>Selecciona una temporada</h4>
+            <p>Elige una temporada para ver el calendario de jornadas.</p>
+        </div>
+    }
+</div>
+
+<!-- Font Awesome para los iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">

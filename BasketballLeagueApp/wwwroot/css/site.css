@@ -1,0 +1,101 @@
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+html, body {
+    height: 100%; /* Asegura que ocupen toda la pantalla */
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    min-height: 100vh;
+}
+
+.main-content {
+    flex: 1; /* Ocupa el espacio restante para empujar el footer */
+}
+
+footer {
+    background-color: #000;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+
+
+
+/* Estilo para cambiar el fondo del navbar a negro y el texto a blanco */
+.navbar-custom {
+    background-color: #000000; /* Color negro */
+}
+
+    .navbar-custom .nav-link,
+    .navbar-custom .navbar-brand {
+        color: white; /* Texto blanco */
+    }
+
+        .navbar-custom .nav-link:hover {
+            color: #cccccc; /* Texto gris al pasar el mouse (opcional) */
+        }
+
+
+/* Asegurar que el dropdown aparezca al pasar el mouse */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+    position: absolute; /* Hacerlo flotante */
+    left: 0; /* Alinear correctamente */
+    top: 100%; /* Colocar debajo del link principal */
+    background-color: #000000; /* Fondo negro (opcional) */
+}
+
+.dropdown-item {
+    color: white; /* Texto blanco para las opciones */
+}
+
+    .dropdown-item:hover {
+        color: #cccccc; /* Texto gris al pasar el mouse */
+        background-color: #333333; /* Fondo gris oscuro para hover (opcional) */
+    }
+
+
+
+/*Scroll*/
+/* Estilizar la barra de scroll en navegadores basados en WebKit (Chrome, Edge, Safari) */
+::-webkit-scrollbar {
+    width: 8px; /* Ancho de la barra */
+}
+
+::-webkit-scrollbar-track {
+    background: #000; /* Fondo negro */
+    border-radius: 10px; /* Bordes redondeados */
+}
+
+    /* Efecto al pasar el mouse sobre la barra */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #444; /* Un poco más claro al pasar el mouse */
+    }
+/* Efecto de resplandor al hacer scroll */
+::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+    transition: background 0.3s ease-in-out;
+}
+
+    /* Resplandor más fuerte al pasar el mouse */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #444;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    }

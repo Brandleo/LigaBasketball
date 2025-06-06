@@ -1,0 +1,82 @@
+﻿@model BasketballLeagueApp.Models.administradores
+@{
+    ViewData["Title"] = "Editar Administrador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-header text-white text-center rounded-top-4" style="background: linear-gradient(45deg, #007bff, #6610f2);">
+                    <h3 class="mb-0"><i class="bi bi-pencil-fill me-2"></i>Editar Administrador</h3>
+                </div>
+                <div class="card-body p-4">
+                    @if (ViewData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success rounded-pill px-4">@ViewData["SuccessMessage"]</div>
+                    }
+
+                    @if (ViewData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger rounded-pill px-4">@ViewData["ErrorMessage"]</div>
+                    }
+
+                    <form method="post" action="@Url.Action("Editar", "Administradores")">
+                        <input type="hidden" name="id" value="@Model.id" />
+
+                        <div class="mb-3">
+                            <label for="nombre" class="form-label fw-semibold">Nombre</label>
+                            <input type="text" name="nombre" class="form-control rounded-pill px-4 shadow-sm" value="@Model.nombre" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="apellido" class="form-label fw-semibold">Apellido</label>
+                            <input type="text" name="apellido" class="form-control rounded-pill px-4 shadow-sm" value="@Model.apellido" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">Correo electrónico</label>
+                            <input type="email" name="email" class="form-control rounded-pill px-4 shadow-sm" value="@Model.email" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-semibold">Nueva Contraseña (opcional)</label>
+                            <div class="input-group">
+                                <input type="password" name="password_hash" id="password" class="form-control rounded-start-pill px-4 shadow-sm" placeholder="Dejar en blanco para mantener la actual">
+                                <button type="button" class="btn btn-outline-secondary rounded-end-pill" onclick="togglePassword()">
+                                    <i id="toggleIcon" class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success rounded-pill shadow-sm fw-semibold">
+                                <i class="bi bi-save me-1"></i>Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword() {
+            var passwordInput = document.getElementById("password");
+            var toggleIcon = document.getElementById("toggleIcon");
+
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                toggleIcon.classList.remove("bi-eye");
+                toggleIcon.classList.add("bi-eye-slash");
+            } else {
+                passwordInput.type = "password";
+                toggleIcon.classList.remove("bi-eye-slash");
+                toggleIcon.classList.add("bi-eye");
+            }
+        }
+    </script>
+}

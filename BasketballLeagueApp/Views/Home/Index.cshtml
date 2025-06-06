@@ -1,0 +1,45 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<style>
+  
+
+    .background-image {
+        background-image: url('/images/bk2.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: calc(100vh - 113px);
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .content-wrapper {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    footer {
+        margin-top: auto;
+    }
+     
+    }
+</style>
+
+
+    <div class="background-image text-center">
+        <h1 class="display-4">¡Bienvenido a Basketball League App!</h1>
+        <p class="lead">Explora, organiza y gestiona tu liga de basketball con facilidad.</p>
+       
+        <a class="btn btn-primary btn-lg" href="/Home/About" role="button">Saber más</a>
+    </div>
+
+

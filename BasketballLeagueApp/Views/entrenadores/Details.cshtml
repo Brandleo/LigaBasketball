@@ -1,0 +1,97 @@
+﻿@model BasketballLeagueApp.Models.entrenadores
+
+@{
+    ViewData["Title"] = "Detalles del Entrenador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+
+}
+<div class="bg-secondary" style="--bs-bg-opacity: .1; height: 89vh">
+    <div class="container mt-4 bg-white rounded-3">
+        <br />
+        <h1 class="text-center">Detalles del Entrenador</h1>
+        <br />
+
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">@Model.nombre @Model.apellido</h4>
+
+                <div class="form-group">
+                    <h5 class="text-muted">Información del Entrenador</h5>
+
+                    @if (Model.historial_entrenadores != null && Model.historial_entrenadores.Any())
+                    {
+                        foreach (var h in Model.historial_entrenadores)
+                        {
+                            <div>
+                                <br />
+                                <p class="text-dark fw-bold"><strong>Equipo: </strong>@h.equipo?.nombre</p>
+                                <p class="text-muted"><strong>Temporada: </strong> @h.temporada?.nombre</p>
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nombre)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nombre)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.apellido)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.apellido)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nacionalidad)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nacionalidad)
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">Información Adicional</h4>
+
+                @if (Model.historial_entrenadores != null && Model.historial_entrenadores.Any())
+                {
+                    foreach (var h in Model.historial_entrenadores)
+                    {
+                        <div>
+                            @if (!string.IsNullOrEmpty(h.equipo?.img))
+                            {
+                                <img src="@h.equipo.img"
+                                     alt="Imagen del equipo"
+                                     width="150" height="150"
+                                     class="rounded border mb-2" />
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+
+        </div>
+
+        <br />
+        <div class="form-group text-center">
+            <a asp-action="Edit" asp-route-id="@Model?.id" class="btn btn-warning px-4">
+                <i class="bi bi-pencil-square"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary px-4">
+                <i class="bi bi-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+        <br />
+    </div>
+</div>

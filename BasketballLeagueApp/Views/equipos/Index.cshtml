@@ -1,0 +1,695 @@
+﻿@model IEnumerable<BasketballLeagueApp.Models.equipos>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Lista de Equipos";
+}
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 text-primary">
+                        <i class="bi bi-shield-fill-check me-2"></i>Gestión de Equipos
+                    </h2>
+                    <p class="text-muted mb-0">Administra los equipos de la liga</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="cambiarVista()">
+                        <i class="bi bi-grid-3x3-gap" id="vistaIcon"></i>
+                        <span id="vistaTexto">Vista Tarjetas</span>
+                    </button>
+                    <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                        <i class="bi bi-plus-lg me-2"></i>Nuevo Equipo
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    @using (Html.BeginForm("Index", "Equipos", FormMethod.Get, new { @class = "row g-3", id = "filtrosForm" }))
+                    {
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-search me-1"></i>Nombre del equipo
+                            </label>
+                            @Html.TextBox("nombre", Context.Request.Query["nombre"], new { 
+                                @class = "form-control", 
+                                placeholder = "Ej. Lakers, Warriors..." 
+                            })
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-geo-alt me-1"></i>Sede
+                            </label>
+                            @Html.TextBox("sede", Context.Request.Query["sede"], new { 
+                                @class = "form-control", 
+                                placeholder = "Ej. San Salvador, Santa Ana..." 
+                            })
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-toggle-on me-1"></i>Estado
+                            </label>
+                            @Html.DropDownList("estado", new SelectList(new[] {
+                                new SelectListItem { Text = "Todos los estados", Value = "" },
+                                new SelectListItem { Text = "✅ Activo", Value = "activo" },
+                                new SelectListItem { Text = "❌ Inactivo", Value = "inactivo" }
+                            }, "Value", "Text", Context.Request.Query["estado"]), new { @class = "form-select" })
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-funnel me-1"></i>Filtrar
+                                </button>
+                                <a href="@Url.Action("Index", "Equipos")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+                                </a>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Total Equipos</h6>
+                            <h3 class="mb-0">@Model.Count()</h3>
+                        </div>
+                        <i class="bi bi-shield-fill-check fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Equipos Activos</h6>
+                            <h3 class="mb-0">@Model.Count(e => e.estado == "activo")</h3>
+                        </div>
+                        <i class="bi bi-check-circle fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Equipos Inactivos</h6>
+                            <h3 class="mb-0">@Model.Count(e => e.estado == "inactivo")</h3>
+                        </div>
+                        <i class="bi bi-pause-circle fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-gradient-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Con Imagen</h6>
+                            <h3 class="mb-0">@Model.Count(e => !string.IsNullOrEmpty(e.img))</h3>
+                        </div>
+                        <i class="bi bi-image fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista de tabla -->
+    <div class="row" id="vistaTabla">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table me-2"></i>Lista de Equipos
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="exportarDatos()">
+                                <i class="bi bi-download me-1"></i>Exportar
+                            </button>
+                            <div class="btn-group">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="seleccionarTodos()">
+                                    <i class="bi bi-check-all me-1"></i>Seleccionar
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="eliminarSeleccionados()" disabled id="btnEliminarMultiple">
+                                    <i class="bi bi-trash me-1"></i>Eliminar (<span id="contadorSeleccionados">0</span>)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="equiposTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 40px;">
+                                            <input type="checkbox" class="form-check-input" id="selectAll">
+                                        </th>
+                                        <th class="sortable" data-column="id">
+                                            <i class="bi bi-hash me-1"></i>ID
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th>
+                                            <i class="bi bi-image me-1"></i>Logo
+                                        </th>
+                                        <th class="sortable" data-column="nombre">
+                                            <i class="bi bi-shield me-1"></i>Nombre
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-column="sede">
+                                            <i class="bi bi-geo-alt me-1"></i>Sede
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-column="estado">
+                                            <i class="bi bi-toggle-on me-1"></i>Estado
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="text-center">
+                                            <i class="bi bi-gear me-1"></i>Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <input type="checkbox" class="form-check-input row-checkbox" value="@item.id">
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">#@item.id</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex justify-content-center">
+                                                    @if (!string.IsNullOrEmpty(item.img))
+                                                    {
+                                                        <div class="position-relative">
+                                                            <img src="~/images/equipos/@item.img" 
+                                                                 alt="@item.nombre" 
+                                                                 class="rounded-circle shadow-sm" 
+                                                                 style="width: 50px; height: 50px; object-fit: cover; cursor: pointer;"
+                                                                 onclick="mostrarImagenCompleta('~/images/equipos/@item.img', '@item.nombre')" />
+                                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="font-size: 8px;">
+                                                                <i class="bi bi-check"></i>
+                                                            </span>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                                                             style="width: 50px; height: 50px;">
+                                                            <i class="bi bi-image text-muted"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div>
+                                                        <strong class="text-primary">@item.nombre</strong>
+                                                        <br>
+                                                        <small class="text-muted">Fundado: N/A</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <i class="bi bi-geo-alt text-primary me-1"></i>
+                                                @item.sede
+                                            </td>
+                                            <td>
+                                                @if (item.estado == "activo")
+                                                {
+                                                    <span class="badge bg-success">
+                                                        <i class="bi bi-check-circle me-1"></i>Activo
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-danger">
+                                                        <i class="bi bi-x-circle me-1"></i>Inactivo
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.id" 
+                                                       class="btn btn-outline-info btn-sm" 
+                                                       title="Ver detalles">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.id" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-sm" 
+                                                            title="Eliminar"
+                                                            onclick="confirmarEliminacion(@item.id, '@item.nombre')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-shield-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No hay equipos registrados</h4>
+                            <p class="text-muted">Comienza creando tu primer equipo</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-2"></i>Crear Primer Equipo
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista de tarjetas -->
+    <div class="row" id="vistaTarjetas" style="display: none;">
+        @foreach (var item in Model)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm equipo-card">
+                    <div class="card-header text-center bg-light">
+                        @if (!string.IsNullOrEmpty(item.img))
+                        {
+                            <img src="~/images/equipos/@item.img" 
+                                 alt="@item.nombre" 
+                                 class="rounded-circle shadow" 
+                                 style="width: 80px; height: 80px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto shadow" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-shield text-white fs-2"></i>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">@item.nombre</h5>
+                        <p class="card-text">
+                            <i class="bi bi-geo-alt text-muted me-1"></i>@item.sede
+                        </p>
+                        <div class="mb-3">
+                            @if (item.estado == "activo")
+                            {
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Activo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-x-circle me-1"></i>Inactivo
+                                </span>
+                            }
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <div class="d-grid gap-2">
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@item.id" class="btn btn-outline-info btn-sm">
+                                    <i class="bi bi-eye me-1"></i>Ver
+                                </a>
+                                @if (!(bool)ViewBag.BloquearEdicion)
+                                {
+                                    <a asp-action="Edit" asp-route-id="@item.id" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Editar
+                                    </a>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-sm btn-outline-secondary" disabled title="Edición bloqueada por temporada activa sin campeón">
+                                        <i class="fas fa-lock"></i> Editar
+                                    </button>
+                                }
+
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        onclick="confirmarEliminacion(@item.id, '@item.nombre')">
+                                    <i class="bi bi-trash me-1"></i>Eliminar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar el equipo <strong id="equipoNombre"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Esta acción eliminará toda la información del equipo, incluyendo jugadores y estadísticas.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="_method" value="delete" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para imagen completa -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="imageModalTitle">Logo del Equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="imageModalImg" src="" alt="" class="img-fluid rounded" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Cambiar entre vista tabla y tarjetas
+function cambiarVista() {
+    const tabla = document.getElementById('vistaTabla');
+    const tarjetas = document.getElementById('vistaTarjetas');
+    const icon = document.getElementById('vistaIcon');
+    const texto = document.getElementById('vistaTexto');
+    
+    if (tabla.style.display === 'none') {
+        tabla.style.display = 'block';
+        tarjetas.style.display = 'none';
+        icon.className = 'bi bi-grid-3x3-gap';
+        texto.textContent = 'Vista Tarjetas';
+    } else {
+        tabla.style.display = 'none';
+        tarjetas.style.display = 'flex';
+        icon.className = 'bi bi-table';
+        texto.textContent = 'Vista Tabla';
+    }
+}
+
+// Funcionalidad de ordenamiento
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('equiposTable');
+    if (!table) return;
+    
+    const headers = table.querySelectorAll('th.sortable');
+    
+    headers.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            const sortIcon = this.querySelector('.sort-icon');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            let ascending = true;
+            if (sortIcon.classList.contains('bi-chevron-up')) {
+                ascending = false;
+            }
+            
+            // Resetear iconos
+            headers.forEach(h => {
+                const icon = h.querySelector('.sort-icon');
+                icon.className = 'bi bi-chevron-expand sort-icon';
+            });
+            
+            // Establecer icono actual
+            sortIcon.className = ascending ? 'bi bi-chevron-up sort-icon' : 'bi bi-chevron-down sort-icon';
+            
+            // Ordenar filas
+            rows.sort((a, b) => {
+                const aValue = getColumnValue(a, column);
+                const bValue = getColumnValue(b, column);
+                
+                if (column === 'id') {
+                    return ascending ? 
+                        parseInt(aValue) - parseInt(bValue) : 
+                        parseInt(bValue) - parseInt(aValue);
+                } else {
+                    return ascending ? 
+                        aValue.localeCompare(bValue) : 
+                        bValue.localeCompare(aValue);
+                }
+            });
+            
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+
+function getColumnValue(row, column) {
+    const columnMap = {
+        'id': 1,
+        'nombre': 3,
+        'sede': 4,
+        'estado': 5
+    };
+    const cell = row.querySelector(`td:nth-child(${columnMap[column] + 1})`);
+    return cell ? cell.textContent.trim() : '';
+}
+
+// Selección múltiple
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const btnEliminar = document.getElementById('btnEliminarMultiple');
+    const contador = document.getElementById('contadorSeleccionados');
+    
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            rowCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            actualizarContador();
+        });
+    }
+    
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', actualizarContador);
+    });
+    
+    function actualizarContador() {
+        const seleccionados = document.querySelectorAll('.row-checkbox:checked').length;
+        contador.textContent = seleccionados;
+        btnEliminar.disabled = seleccionados === 0;
+        
+        // Actualizar estado del checkbox principal
+        if (selectAll) {
+            selectAll.indeterminate = seleccionados > 0 && seleccionados < rowCheckboxes.length;
+            selectAll.checked = seleccionados === rowCheckboxes.length;
+        }
+    }
+});
+
+// Confirmar eliminación individual
+function confirmarEliminacion(id, nombre) {
+    document.getElementById('equipoNombre').textContent = nombre;
+    document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + id;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Eliminar seleccionados
+function eliminarSeleccionados() {
+    const seleccionados = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
+    if (seleccionados.length === 0) return;
+    
+    if (confirm(`¿Eliminar ${seleccionados.length} equipos seleccionados?`)) {
+        // Implementar lógica de eliminación múltiple
+        console.log('Eliminar equipos:', seleccionados);
+    }
+}
+
+// Seleccionar todos
+function seleccionarTodos() {
+    const selectAll = document.getElementById('selectAll');
+    selectAll.checked = !selectAll.checked;
+    selectAll.dispatchEvent(new Event('change'));
+}
+
+// Mostrar imagen completa
+function mostrarImagenCompleta(src, nombre) {
+    document.getElementById('imageModalImg').src = src;
+    document.getElementById('imageModalTitle').textContent = `Logo de ${nombre}`;
+    new bootstrap.Modal(document.getElementById('imageModal')).show();
+}
+
+// Exportar datos (placeholder)
+function exportarDatos() {
+    alert('Funcionalidad de exportación - implementar según necesidades');
+}
+
+// Auto-dismiss alerts
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        if (alert.querySelector('.btn-close')) {
+            bootstrap.Alert.getOrCreateInstance(alert).close();
+        }
+    });
+}, 5000);
+</script>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(45deg, #28a745, #1e7e34);
+}
+
+.bg-gradient-warning {
+    background: linear-gradient(45deg, #ffc107, #e0a800);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(45deg, #17a2b8, #138496);
+}
+
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sort-icon {
+    float: right;
+    margin-top: 2px;
+    font-size: 0.8em;
+    transition: transform 0.2s;
+}
+
+.equipo-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.equipo-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.btn-group .btn {
+    border-radius: 0.25rem;
+    margin: 0 1px;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+@@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .btn-group .btn {
+        margin: 1px 0;
+        border-radius: 0.25rem;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .card-body .btn-group {
+        flex-direction: row;
+    }
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+#vistaTarjetas {
+    flex-wrap: wrap;
+}
+</style>

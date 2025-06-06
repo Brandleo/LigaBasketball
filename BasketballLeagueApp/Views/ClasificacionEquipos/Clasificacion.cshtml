@@ -1,0 +1,220 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteClasificacionVM
+@{
+    ViewData["Title"] = "Reporte de Clasificación de Equipos";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-trophy-fill me-2"></i>
+                        @ViewData["Title"]
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Formulario de selección de temporada -->
+                    <form asp-action="Clasificacion" method="post" class="row g-3 mb-4">
+                        <div class="col-md-8">
+                            <label asp-for="TemporadaSeleccionada" class="form-label fw-bold">
+                                <i class="bi bi-calendar3 me-1"></i>Temporada:
+                            </label>
+                            <select asp-for="TemporadaSeleccionada" 
+                                    asp-items="Model.TemporadasDisponibles" 
+                                    class="form-select" 
+                                    required>
+                                <option value="">Seleccione una temporada</option>
+                            </select>
+                            <span asp-validation-for="TemporadaSeleccionada" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-search me-1"></i> Ver Clasificación
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Tabla de clasificación -->
+                    @if (Model.Filas != null && Model.Filas.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="text-center" style="width: 60px;">
+                                            <i class="bi bi-hash"></i>
+                                        </th>
+                                        <th>
+                                            <i class="bi bi-people-fill me-1"></i>Equipo
+                                        </th>
+                                        <th class="text-center" title="Partidos Jugados">PJ</th>
+                                        <th class="text-center text-success" title="Partidos Ganados">PG</th>
+                                        <th class="text-center text-danger" title="Partidos Perdidos">PP</th>
+                                        <th class="text-center text-primary" title="Puntos a Favor">PF</th>
+                                        <th class="text-center text-warning" title="Puntos en Contra">PC</th>
+                                        <th class="text-center" title="Diferencia de Puntos">Dif</th>
+                                        <th class="text-center fw-bold" title="Puntos Totales">
+                                            <i class="bi bi-star-fill me-1"></i>Pts
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var pos = 1;
+                                        var equiposOrdenados = Model.Filas
+                                            .OrderByDescending(f => f.PuntosTotales)
+                                            .ThenByDescending(f => f.Diferencia)
+                                            .ThenByDescending(f => f.PuntosFavor);
+                                    }
+                                    @foreach (var fila in equiposOrdenados)
+                                    {
+                                        <tr class="@(pos <= 3 ? "table-success" : pos > Model.Filas.Count() - 2 ? "table-danger" : "")">
+                                            <td class="text-center fw-bold">
+                                                @if (pos == 1)
+                                                {
+                                                    <span class="badge bg-warning text-dark">
+                                                        <i class="bi bi-trophy-fill"></i> @pos
+                                                    </span>
+                                                }
+                                                else if (pos <= 3)
+                                                {
+                                                    <span class="badge bg-secondary">@pos</span>
+                                                }
+                                                else
+                                                {
+                                                    @pos
+                                                }
+                                            </td>
+                                            <td class="fw-semibold">@fila.Equipo</td>
+                                            <td class="text-center">@fila.PartidosJugados</td>
+                                            <td class="text-center text-success fw-bold">@fila.PartidosGanados</td>
+                                            <td class="text-center text-danger">@fila.PartidosPerdidos</td>
+                                            <td class="text-center">@fila.PuntosFavor</td>
+                                            <td class="text-center">@fila.PuntosContra</td>
+                                            <td class="text-center @(fila.Diferencia > 0 ? "text-success" : fila.Diferencia < 0 ? "text-danger" : "")">
+                                                @(fila.Diferencia > 0 ? "+" : "")@fila.Diferencia
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary fs-6 fw-bold">
+                                                    @fila.PuntosTotales
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        pos++;
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Leyenda -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-body py-2">
+                                        <small class="text-muted">
+                                            <strong>Leyenda:</strong>
+                                            <span class="badge bg-success ms-2">Top 3</span>
+                                            <span class="badge bg-danger ms-1">Últimos 2</span>
+                                            <span class="ms-3">
+                                                PJ: Partidos Jugados | PG: Partidos Ganados | PP: Partidos Perdidos | 
+                                                PF: Puntos a Favor | PC: Puntos en Contra | Dif: Diferencia | Pts: Puntos Totales
+                                            </span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Estadísticas adicionales -->
+                        @if (Model.Filas != null)
+                        {
+                            var totalPartidos = Model.Filas.Sum(f => f.PartidosJugados) / 2;
+                            var promedioAnotacion = Model.Filas.Average(f => f.PuntosFavor);
+                       
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card border-info">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-info">
+                                            <i class="bi bi-graph-up"></i> Total de Partidos
+                                        </h5>
+                                        <h3 class="text-primary">@totalPartidos</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title text-success">
+                                            <i class="bi bi-bullseye"></i> Promedio de Anotación
+                                        </h5>
+                                        <h3 class="text-success">@promedioAnotacion.ToString("F1")</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        }
+                    }
+                    else if (Model.TemporadaSeleccionada > 0)
+                    {
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            <div>
+                                <strong>Sin datos disponibles</strong><br>
+                                No hay datos de partidos para la temporada seleccionada.
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info d-flex align-items-center" role="alert">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <div>
+                                Seleccione una temporada para ver la clasificación de los equipos.
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Mejorar la experiencia del usuario
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-submit cuando cambie la temporada (opcional)
+            const selectTemporada = document.querySelector('select[name="TemporadaSeleccionada"]');
+            if (selectTemporada) {
+                selectTemporada.addEventListener('change', function() {
+                    // Opcional: enviar automáticamente el formulario cuando cambie la selección
+                    // this.form.submit();
+                });
+            }
+
+            // Añadir tooltips a las celdas de estadísticas
+            const tooltips = {
+                'PJ': 'Partidos Jugados',
+                'PG': 'Partidos Ganados', 
+                'PP': 'Partidos Perdidos',
+                'PF': 'Puntos a Favor',
+                'PC': 'Puntos en Contra',
+                'Dif': 'Diferencia de Puntos',
+                'Pts': 'Puntos Totales'
+            };
+
+            // Activar tooltips de Bootstrap si están disponibles
+            if (typeof bootstrap !== 'undefined') {
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
+        });
+    </script>
+}

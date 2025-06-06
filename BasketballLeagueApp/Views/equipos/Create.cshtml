@@ -1,0 +1,85 @@
+﻿@model BasketballLeagueApp.Models.equipos
+
+@{
+    ViewData["Title"] = "Agregar Equipo";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <h3 class="mb-0">
+                <i class="bi bi-plus-circle me-2"></i>Agregar Nuevo Equipo
+            </h3>
+        </div>
+
+        <div class="card-body">
+            <!-- Mensajes -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>@TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>@TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <!-- Formulario -->
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="nombre" class="form-label"><i class="bi bi-shield me-1"></i>Nombre del Equipo</label>
+                        <input asp-for="nombre" class="form-control" placeholder="Ej: Lakers" />
+                        <span asp-validation-for="nombre" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="sede" class="form-label"><i class="bi bi-geo-alt me-1"></i>Sede</label>
+                        <input asp-for="sede" class="form-control" placeholder="Ej: Los Ángeles" />
+                        <span asp-validation-for="sede" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="ImagenEquipo" class="form-label"><i class="bi bi-image me-1"></i>Logo del equipo (opcional)</label>
+                        <input type="file" name="ImagenEquipo" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="estado" class="form-label"><i class="bi bi-toggle-on me-1"></i>Estado del Equipo</label>
+                        <select asp-for="estado" class="form-select">
+                            <option value="" disabled selected>Seleccione un estado</option>
+                            <option value="activo">✅ Activo</option>
+                            <option value="inactivo">❌ Inactivo</option>
+                        </select>
+                        <span asp-validation-for="estado" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Botones -->
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-x-circle me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-save me-1"></i>Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

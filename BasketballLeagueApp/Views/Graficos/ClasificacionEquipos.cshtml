@@ -1,0 +1,100 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+@model GraficoComparacionEquiposVM
+@{
+    ViewData["Title"] = "Clasificación de Equipos";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="bi bi-bar-chart-line"></i> Clasificación de Equipos</h4>
+        </div>
+        <div class="card-body">
+            <form id="filtros-form" class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="temporada" class="form-label">Temporada:</label>
+                    <select id="temporada" class="form-select">
+                        @foreach (var item in Model.TemporadasDisponibles)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">Mostrar</button>
+                </div>
+            </form>
+
+            <div class="text-center">
+                <canvas id="graficoClasificacion" height="500"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const form = document.getElementById("filtros-form");
+        const ctx = document.getElementById("graficoClasificacion").getContext("2d");
+        let chart;
+
+        async function cargarGrafico() {
+            const temporada = document.getElementById("temporada").value;
+
+            const res = await fetch(`/Graficos/ObtenerClasificacionEquipos?temporadaId=${temporada}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos Totales',
+                        data: data.datos,
+                        backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Puntos Totales por Equipo en la Temporada',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} pts`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGrafico();
+        });
+
+        window.onload = cargarGrafico;
+    </script>
+}

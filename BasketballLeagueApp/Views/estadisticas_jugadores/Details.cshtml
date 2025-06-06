@@ -1,0 +1,78 @@
+﻿@model BasketballLeagueApp.Models.estadisticas_jugadores
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>estadisticas_jugadores</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.minutos_jugados)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.minutos_jugados)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.puntos)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.puntos)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.rebotes)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.rebotes)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.asistencias)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.asistencias)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.robos)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.robos)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.bloqueos)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.bloqueos)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.perdidas)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.perdidas)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.faltas)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.faltas)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.jugador)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.jugador.id)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.partido)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.partido.id)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

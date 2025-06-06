@@ -1,0 +1,78 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+@model GraficoComparacionEquiposVM
+@{
+    ViewData["Title"] = "Comparación de Equipos";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="filtros-form">
+    <label>Estadística:</label>
+    <select id="estadistica" name="estadistica">
+        @foreach (var item in Model.EstadisticasDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <label>Temporada:</label>
+    <select id="temporada" name="temporada">
+        @foreach (var item in Model.TemporadasDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <button type="submit">Actualizar</button>
+</form>
+
+<canvas id="graficoEquipos" width="800" height="400"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const form = document.getElementById("filtros-form");
+        const ctx = document.getElementById("graficoEquipos").getContext("2d");
+        let chart;
+
+        async function cargarGrafico() {
+            const estadistica = document.getElementById("estadistica").value;
+            const temporada = document.getElementById("temporada").value;
+
+            const res = await fetch(`/Graficos/ObtenerDatosComparacion?temporadaId=${temporada}&estadistica=${estadistica}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: estadistica.toUpperCase(),
+                        data: data.datos,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Comparación de Equipos - ${estadistica.toUpperCase()}`
+                        }
+                    }
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGrafico();
+        });
+
+        window.onload = cargarGrafico;
+    </script>
+}

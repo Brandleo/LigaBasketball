@@ -1,0 +1,38 @@
+﻿@model IEnumerable<BasketballLeagueApp.Models.jornadas>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<h2>Jornadas de la Temporada</h2>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Número de Jornada</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var jornada in Model)
+        {
+            <tr>
+                <td>@jornada.numero_jornada</td>
+                <td>@jornada.fecha_inicio.ToShortDateString()</td>
+                <td>@jornada.fecha_fin.ToShortDateString()</td>
+                <td>
+                    <a asp-action="VerPartidos" asp-route-jornadaId="@jornada.id" class="btn btn-primary">Ver Partidos</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

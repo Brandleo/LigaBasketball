@@ -1,0 +1,41 @@
+﻿@model BasketballLeagueApp.Models.partidos
+
+@{
+    ViewData["Title"] = "Editar Partido";
+}
+
+<h2 class="text-center my-4">Editar Partido</h2>
+
+<div class="container">
+    <form asp-action="EditarPartido" method="post" class="card p-4 shadow-sm">
+        @Html.HiddenFor(m => m.id)
+        @Html.HiddenFor(m => m.jornada_id)
+
+        <div class="mb-3">
+            <label class="form-label">Equipo Local</label>
+            <input class="form-control" value="@Model.equipo_local.nombre" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Equipo Visitante</label>
+            <input class="form-control" value="@Model.equipo_visitante.nombre" disabled />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="fecha" class="form-label">Fecha</label>
+            @Html.TextBoxFor(m => m.fecha, "{0:yyyy-MM-dd}", new { @class = "form-control", type = "date" })
+            @Html.ValidationMessageFor(m => m.fecha, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="hora" class="form-label">Hora</label>
+            @Html.TextBoxFor(m => m.hora, new { @class = "form-control", type = "time" })
+            @Html.ValidationMessageFor(m => m.hora, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a asp-action="VerPartidos" asp-route-jornadaId="@Model.jornada_id" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,179 @@
+﻿@model IEnumerable<BasketballLeagueApp.Models.entrenadores>
+@{
+    ViewData["Title"] = "Lista de Entrenadores";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<!-- Mensajes -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="mb-0 text-primary">
+                    <i class="bi bi-person-badge-fill me-2"></i>Gestión de Entrenadores
+                </h2>
+                <p class="text-muted mb-0">Administra a los entrenadores de la liga</p>
+            </div>
+            <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
+                <i class="bi bi-person-plus me-2"></i>Nuevo Entrenador
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form id="filtroForm" asp-action="Index" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="bi bi-search me-1"></i>Buscar por nombre</label>
+                            <input type="text" name="searchString" class="form-control" placeholder="Ej. José Ramírez"
+                                   value="@Context.Request.Query["searchString"]" oninput="enviarFormulario()" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label"><i class="bi bi-flag me-1"></i>Nacionalidad</label>
+                            <select name="nacionalidadFiltro" class="form-select" asp-items="ViewBag.Nacionalidades" onchange="enviarFormulario()">
+                                <option value="">Todas las Nacionalidades</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <a asp-action="Index" class="btn btn-outline-secondary w-100">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Limpiar Filtros
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de entrenadores -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-table me-2"></i>Lista de Entrenadores</h5>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0 text-center align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th><i class="bi bi-person"></i> Nombre</th>
+                                        <th><i class="bi bi-person-vcard"></i> Apellido</th>
+                                        <th><i class="bi bi-flag-fill"></i> Nacionalidad</th>
+                                        <th><i class="bi bi-calendar-event"></i> Temporada</th>
+                                        <th><i class="bi bi-shield-fill"></i> Equipo</th>
+                                        <th><i class="bi bi-gear"></i> Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var entrenador in Model)
+                                    {
+                                        var historial = entrenador.historial_entrenadores?.FirstOrDefault();
+                                        var estadoEquipo = historial?.equipo?.estado;
+
+                                        <tr>
+                                            <td>@entrenador.nombre</td>
+                                            <td>@entrenador.apellido</td>
+                                            <td>@entrenador.nacionalidad</td>
+                                            <td>@historial?.temporada?.nombre ?? "-"</td>
+                                            <td>@historial?.equipo?.nombre ?? "-"</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    @if (estadoEquipo != "Activo")
+                                                    {
+                                                        <a asp-action="Edit" asp-route-id="@entrenador.id" class="btn btn-outline-warning btn-sm">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+                                                        <a asp-action="Delete" asp-route-id="@entrenador.id" class="btn btn-outline-danger btn-sm">
+                                                            <i class="bi bi-trash"></i>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Equipo Activo</span>
+                                                    }
+
+                                                    <a asp-action="Details" asp-route-id="@entrenador.id" class="btn btn-outline-info btn-sm">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-person-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No hay entrenadores registrados</h4>
+                            <p class="text-muted">Comienza creando tu primer entrenador</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-2"></i>Crear Entrenador
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let typingTimer;
+        let doneTypingInterval = 800;
+        function enviarFormulario() {
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                document.getElementById("filtroForm").submit();
+            }, doneTypingInterval);
+        }
+    </script>
+}
+
+<style>
+    .table thead th {
+        vertical-align: middle;
+    }
+
+    .btn-group .btn {
+        margin: 0 2px;
+        border-radius: 0.25rem;
+    }
+
+    .alert {
+        border-left: 4px solid;
+    }
+
+    .alert-success {
+        border-left-color: #28a745;
+    }
+
+    .alert-danger {
+        border-left-color: #dc3545;
+    }
+</style>

@@ -1,0 +1,155 @@
+﻿@model BasketballLeagueApp.Models.jugadores
+@{
+    ViewData["Title"] = "Editar Jugador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+            <h3 class="mb-0">
+                <i class="bi bi-pencil-square me-2"></i>Editar Jugador
+            </h3>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                <input type="hidden" asp-for="id" />
+
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <h5 class="text-secondary">@Model.nombre @Model.apellido</h5>
+                        <div class="form-group">
+                            <label for="uploadFile" class="form-label">Subir nueva imagen</label><br />
+                            <img id="previewImg" src="@Model.img" width="200" height="200" alt="Imagen de @Model.nombre" class="img-fluid rounded border mb-2" />
+                            <input type="file" name="uploadFile" class="form-control" accept="image/*" onchange="vistaPreviaArchivo(this)" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="nombre" class="form-label"><i class="bi bi-person me-1"></i>Nombre</label>
+                                <input asp-for="nombre" class="form-control" />
+                                <span asp-validation-for="nombre" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="apellido" class="form-label"><i class="bi bi-person-vcard me-1"></i>Apellido</label>
+                                <input asp-for="apellido" class="form-control" />
+                                <span asp-validation-for="apellido" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="fecha_nacimiento" class="form-label"><i class="bi bi-calendar3 me-1"></i>Fecha de Nacimiento</label>
+                                <input asp-for="fecha_nacimiento" type="date" class="form-control" />
+                                <span asp-validation-for="fecha_nacimiento" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="nacionalidad" class="form-label"><i class="bi bi-flag me-1"></i>Nacionalidad</label>
+                                <input asp-for="nacionalidad" class="form-control" />
+                                <span asp-validation-for="nacionalidad" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="dorsal" class="form-label"><i class="bi bi-123 me-1"></i>Dorsal</label>
+                                <input asp-for="dorsal" type="number" class="form-control" />
+                                <span asp-validation-for="dorsal" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="estatura" class="form-label"><i class="bi bi-arrows-expand me-1"></i>Estatura (m)</label>
+                                <input asp-for="estatura" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="estatura" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="peso" class="form-label"><i class="bi bi-hash me-1"></i>Peso (kg)</label>
+                                <input asp-for="peso" type="number" step="0.01" class="form-control" />
+                                <span asp-validation-for="peso" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="posicion" class="form-label"><i class="bi bi-joystick me-1"></i>Posición</label>
+                                <select asp-for="posicion" class="form-select">
+                                    <option value="base">Base</option>
+                                    <option value="escolta">Escolta</option>
+                                    <option value="alero">Alero</option>
+                                    <option value="ala_pívot">Ala Pívot</option>
+                                    <option value="pívot">Pívot</option>
+                                </select>
+                                <span asp-validation-for="posicion" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="equipo_id" class="form-label"><i class="bi bi-shield me-1"></i>Equipo</label>
+                                <select asp-for="equipo_id" class="form-select" asp-items="ViewBag.equipo">
+                                    <option value="">Seleccione un equipo</option>
+                                </select>
+                                <span asp-validation-for="equipo_id" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="estado" class="form-label"><i class="bi bi-toggle-on me-1"></i>Estado</label>
+                                <select asp-for="estado" class="form-select">
+                                    <option value="activo">Activo</option>
+                                    <option value="inactivo">Inactivo</option>
+                                </select>
+                                <span asp-validation-for="estado" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function vistaPreviaArchivo(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("previewImg").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}
+
+<style>
+    .form-label i {
+        color: #0d6efd;
+    }
+
+    .btn {
+        border-radius: 0.25rem;
+    }
+
+    .alert-danger {
+        border-left: 4px solid #dc3545;
+    }
+
+    .form-control,
+    .form-select {
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+    }
+</style>

@@ -1,0 +1,96 @@
+﻿@model BasketballLeagueApp.Models.entrenadores
+
+@{
+    ViewData["Title"] = "Editar Entrenador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark d-flex align-items-center">
+            <h3 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Editar Entrenador</h3>
+        </div>
+
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="id" />
+
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <img src="~/images/iconoEntrenador.png" alt="Entrenador"
+                             class="img-fluid rounded shadow-sm" style="max-height: 240px;" />
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="nombre" class="form-label"><i class="bi bi-person me-1"></i>Nombre</label>
+                                <input asp-for="nombre" class="form-control" />
+                                <span asp-validation-for="nombre" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="apellido" class="form-label"><i class="bi bi-person-vcard me-1"></i>Apellido</label>
+                                <input asp-for="apellido" class="form-control" />
+                                <span asp-validation-for="apellido" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="nacionalidad" class="form-label"><i class="bi bi-flag me-1"></i>Nacionalidad</label>
+                                <input asp-for="nacionalidad" class="form-control" />
+                                <span asp-validation-for="nacionalidad" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="equipo_id" class="form-label"><i class="bi bi-shield-fill me-1"></i>Equipo</label>
+                                <select name="equipo_id" class="form-select" asp-items="ViewBag.Equipos">
+                                    <option value="">Seleccione un equipo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="temporada_id" class="form-label"><i class="bi bi-calendar-event me-1"></i>Temporada</label>
+                                <select name="temporada_id" class="form-select" asp-items="ViewBag.Temporadas">
+                                    <option value="">Seleccione una temporada</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}
+
+<style>
+    .form-label i {
+        color: #0d6efd;
+    }
+
+    .btn-group .btn,
+    .btn {
+        border-radius: 0.25rem;
+    }
+
+    .alert-danger {
+        border-left: 4px solid #dc3545;
+    }
+
+    .form-control,
+    .form-select {
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+    }
+
+</style>

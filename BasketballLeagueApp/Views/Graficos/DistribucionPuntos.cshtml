@@ -1,0 +1,101 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+
+@model GraficoDistribucionPuntosVM
+@{
+    ViewData["Title"] = "Distribución de Puntos por Jugador";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="filtros-form">
+    <label>Temporada:</label>
+    <select id="temporada">
+        @foreach (var item in Model.TemporadasDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <label>Equipo:</label>
+    <select id="equipo">
+        @foreach (var item in Model.EquiposDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <button type="submit">Actualizar</button>
+</form>
+
+<canvas id="graficoPastel" width="800" height="400"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const form = document.getElementById("filtros-form");
+        const ctx = document.getElementById("graficoPastel").getContext("2d");
+        let chart;
+
+        async function cargarGrafico() {
+            const temporada = document.getElementById("temporada").value;
+            const equipo = document.getElementById("equipo").value;
+
+            const res = await fetch(`/Graficos/ObtenerDistribucionPuntos?temporadaId=${temporada}&equipoId=${equipo}`, {
+                method: 'POST'
+            });
+
+            const data = await res.json();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos',
+                        data: data.datos,
+                        backgroundColor: data.etiquetas.map(() =>
+                            `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
+                        )
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución de Puntos por Jugador'
+                        }
+                    }
+                }
+            });
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGrafico();
+        });
+
+        window.onload = cargarGrafico;
+    </script>
+
+    <script>
+        document.getElementById("temporada").addEventListener("change", async function () {
+            const temporadaId = this.value;
+            const equipoSelect = document.getElementById("equipo");
+            equipoSelect.innerHTML = ""; // limpiar opciones anteriores
+
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await res.json();
+
+            data.forEach(item => {
+                const option = document.createElement("option");
+                option.value = item.value;
+                option.text = item.text;
+                equipoSelect.appendChild(option);
+            });
+        });
+    </script>
+
+}

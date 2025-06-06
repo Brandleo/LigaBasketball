@@ -1,0 +1,102 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteResultadosJornadaVM
+@{
+    ViewData["Title"] = "Resultados de Partidos por Jornada";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Resultados de Partidos por Jornada</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="ResultadosPorJornada" method="post" id="form-resultados">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Temporada</label>
+                        <select asp-for="TemporadaSeleccionada" asp-items="Model.Temporadas" class="form-select" id="temporadaSelect">
+                            <option value="">Seleccione una temporada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Jornada</label>
+                        <select asp-for="JornadaSeleccionada" asp-items="Model.Jornadas" class="form-select" id="jornadaSelect" disabled>
+                            <option value="">Seleccione una jornada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Ver Resultados</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @if (Model.Partidos != null && Model.Partidos.Any())
+    {
+        <div class="text-end mb-3">
+            <a asp-action="ExportarResultadosJornadaPDF"
+               asp-route-temporadaId="@Model.TemporadaSeleccionada"
+               asp-route-jornadaId="@Model.JornadaSeleccionada"
+               class="btn btn-danger">
+                Descargar PDF
+            </a>
+        </div>
+    }
+    @if (Model.Partidos != null && Model.Partidos.Any())
+    {
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Resultados</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Partido</th>
+                            <th>Puntos Local</th>
+                            <th>Puntos Visitante</th>
+                            <th>Ganador</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var partido in Model.Partidos)
+                        {
+                            <tr>
+                                <td>@partido.Equipos</td>
+                                <td>@partido.PuntosLocal</td>
+                                <td>@partido.PuntosVisitante</td>
+                                <td><strong>@partido.Ganador</strong></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        const temporadaSelect = document.getElementById('temporadaSelect');
+        const jornadaSelect = document.getElementById('jornadaSelect');
+
+        temporadaSelect.addEventListener('change', async function () {
+            const temporadaId = this.value;
+
+            jornadaSelect.innerHTML = '<option value="">Seleccione una jornada</option>';
+            jornadaSelect.disabled = true;
+
+            if (temporadaId) {
+                const response = await fetch(`/Reportes/ObtenerJornadasPorTemporada?temporadaId=${temporadaId}`);
+                const data = await response.json();
+
+                data.forEach(j => {
+                    jornadaSelect.innerHTML += `<option value="${j.value}">${j.text}</option>`;
+                });
+
+                jornadaSelect.disabled = false;
+            }
+        });
+    </script>
+}

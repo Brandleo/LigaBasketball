@@ -1,0 +1,108 @@
+﻿@model List<BasketballLeagueApp.Models.ViewModels.ReporteFilaClasificacion>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Clasificación de Equipos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        .titulo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+            .titulo h1 {
+                font-size: 24px;
+                margin: 0;
+            }
+
+        .subtitulo {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+
+        th {
+            background-color: #1a1a1a;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            text-align: right;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="titulo">
+        <h1>Reporte de Clasificación</h1>
+    </div>
+    <div class="subtitulo">
+        Temporada: @DateTime.Now.Year
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Equipo</th>
+                <th>PJ</th>
+                <th>PG</th>
+                <th>PP</th>
+                <th>PF</th>
+                <th>PC</th>
+                <th>DIF</th>
+                <th>PTS</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int pos = 1;
+                foreach (var fila in Model.OrderByDescending(f => f.PuntosTotales))
+                {
+                    <tr>
+                        <td>@pos</td>
+                        <td>@fila.Equipo</td>
+                        <td>@fila.PartidosJugados</td>
+                        <td>@fila.PartidosGanados</td>
+                        <td>@fila.PartidosPerdidos</td>
+                        <td>@fila.PuntosFavor</td>
+                        <td>@fila.PuntosContra</td>
+                        <td>@fila.Diferencia</td>
+                        <td><strong>@fila.PuntosTotales</strong></td>
+                    </tr>
+                    pos++;
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="footer">
+        Generado el @DateTime.Now.ToString("dd/MM/yyyy HH:mm")
+    </div>
+</body>
+</html>

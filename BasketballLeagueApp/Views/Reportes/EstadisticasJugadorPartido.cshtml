@@ -1,0 +1,141 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteEstadisticasJugadorPartidoVM
+@{
+    ViewData["Title"] = "Estadísticas de Jugador por Temporada";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Estadísticas de Jugador por Temporada</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="EstadisticasJugadorPartido" method="post" id="form-estadisticas">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Temporada</label>
+                        <select asp-for="TemporadaSeleccionada" asp-items="Model.Temporadas" class="form-select" id="temporadaSelect">
+                            <option value="">Seleccione</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Equipo</label>
+                        <select asp-for="EquipoSeleccionado" asp-items="Model.Equipos" class="form-select" id="equipoSelect" disabled>
+                            <option value="">Seleccione</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Jugador</label>
+                        <select asp-for="JugadorSeleccionado" asp-items="Model.Jugadores" class="form-select" id="jugadorSelect" disabled>
+                            <option value="">Seleccione</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-between">
+                    <button type="submit" class="btn btn-primary">Ver Estadísticas</button>
+
+                    @if (Model.Resultados != null && Model.Resultados.Any())
+                    {
+                        <a asp-action="ExportarEstadisticasJugadorPDF"
+                           asp-route-temporadaId="@Model.TemporadaSeleccionada"
+                           asp-route-jugadorId="@Model.JugadorSeleccionado"
+                           class="btn btn-outline-danger">
+                            Descargar PDF
+                        </a>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Resultados != null && Model.Resultados.Any())
+    {
+        <div class="card mt-4 shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0">Resultados</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Partido</th>
+                            <th>Minutos</th>
+                            <th>Puntos</th>
+                            <th>Rebotes</th>
+                            <th>Asistencias</th>
+                            <th>Faltas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.Resultados)
+                        {
+                            <tr>
+                                <td>@item.Fecha</td>
+                                <td>@item.Partido</td>
+                                <td>@item.MinutosJugados</td>
+                                <td>@item.Puntos</td>
+                                <td>@item.Rebotes</td>
+                                <td>@item.Asistencias</td>
+                                <td>@item.Faltas</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
+
+
+
+@section Scripts {
+<script>
+    const equipoSelect = document.getElementById('equipoSelect');
+    const jugadorSelect = document.getElementById('jugadorSelect');
+
+    document.getElementById('temporadaSelect').addEventListener('change', async function () {
+        const temporadaId = this.value;
+
+        // Reset y bloquear siguientes
+        equipoSelect.innerHTML = '<option value="">Seleccione</option>';
+        equipoSelect.disabled = true;
+
+        jugadorSelect.innerHTML = '<option value="">Seleccione</option>';
+        jugadorSelect.disabled = true;
+
+        if (temporadaId) {
+            const response = await fetch(`/Reportes/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await response.json();
+
+            equipoSelect.innerHTML = '<option value="">Seleccione</option>';
+            data.forEach(e => {
+                equipoSelect.innerHTML += `<option value="${e.value}">${e.text}</option>`;
+            });
+
+            equipoSelect.disabled = false;
+        }
+    });
+
+    equipoSelect.addEventListener('change', async function () {
+        const equipoId = this.value;
+
+        jugadorSelect.innerHTML = '<option value="">Seleccione</option>';
+        jugadorSelect.disabled = true;
+
+        if (equipoId) {
+            const response = await fetch(`/Reportes/ObtenerJugadoresPorEquipo?equipoId=${equipoId}`);
+            const data = await response.json();
+
+            data.forEach(j => {
+                jugadorSelect.innerHTML += `<option value="${j.value}">${j.text}</option>`;
+            });
+
+            jugadorSelect.disabled = false;
+        }
+    });
+</script>
+}
+
+

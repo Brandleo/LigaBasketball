@@ -1,0 +1,89 @@
+﻿@model BasketballLeagueApp.Models.partidos
+
+@{
+    ViewData["Title"] = "Detalle del Partido";
+}
+
+<h2>Resultado del Partido</h2>
+
+<div class="alert alert-success" role="alert">
+    @TempData["SuccessMessage"]
+</div>
+<div class="alert alert-danger" role="alert">
+    @TempData["ErrorMessage"]
+</div>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Equipo Local</th>
+            <th>Puntos</th>
+            <th>Equipo Visitante</th>
+            <th>Puntos</th>
+            <th>Ganador</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>@Model.equipo_local.nombre</td>
+            <td>@Model.puntos_local</td>
+            <td>@Model.equipo_visitante.nombre</td>
+            <td>@Model.puntos_visitante</td>
+            <td>
+                @if (Model.ganador != null)
+                {
+                    <strong>@Model.ganador.nombre</strong>
+                }
+                else
+                {
+                    <span>Empate</span>
+                }
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<hr />
+
+<h3>Estadísticas de Jugadores</h3>
+
+@if (Model.estadisticas_jugadores == null || !Model.estadisticas_jugadores.Any())
+{
+    <p>No hay estadísticas registradas para este partido.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Jugador</th>
+                <th>Equipo</th>
+                <th>Minutos</th>
+                <th>Puntos</th>
+                <th>Rebotes</th>
+                <th>Asistencias</th>
+                <th>Robos</th>
+                <th>Bloqueos</th>
+                <th>Pérdidas</th>
+                <th>Faltas</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var stat in Model.estadisticas_jugadores)
+            {
+                <tr>
+                    <td>@stat.jugador.nombre @stat.jugador.apellido</td>
+                    <td>@stat.jugador.equipo.nombre</td>
+                    <td>@stat.minutos_jugados</td>
+                    <td>@stat.puntos</td>
+                    <td>@stat.rebotes</td>
+                    <td>@stat.asistencias</td>
+                    <td>@stat.robos</td>
+                    <td>@stat.bloqueos</td>
+                    <td>@stat.perdidas</td>
+                    <td>@stat.faltas</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

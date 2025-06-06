@@ -1,0 +1,110 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+
+@model GraficoRendimientoJugadorVM
+@{
+    ViewData["Title"] = "Rendimiento del Jugador";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="filtros-form">
+    <label>Temporada:</label>
+    <select id="temporada">
+        @foreach (var item in Model.TemporadasDisponibles)
+        {
+            <option value="@item.Value">@item.Text</option>
+        }
+    </select>
+
+    <label>Equipo:</label>
+    <select id="equipo"></select>
+
+    <label>Jugador:</label>
+    <select id="jugador"></select>
+
+    <button type="submit">Mostrar</button>
+</form>
+
+<canvas id="graficoRadar" width="800" height="400"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const temporadaSelect = document.getElementById("temporada");
+        const equipoSelect = document.getElementById("equipo");
+        const jugadorSelect = document.getElementById("jugador");
+        const ctx = document.getElementById("graficoRadar").getContext("2d");
+        let chart;
+
+        temporadaSelect.addEventListener("change", async () => {
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaSelect.value}`);
+            const data = await res.json();
+            equipoSelect.innerHTML = "";
+            jugadorSelect.innerHTML = "";
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.value;
+                opt.text = item.text;
+                equipoSelect.appendChild(opt);
+            });
+        });
+
+        equipoSelect.addEventListener("change", async () => {
+            const res = await fetch(`/Graficos/ObtenerJugadoresPorEquipo?equipoId=${equipoSelect.value}`);
+            const data = await res.json();
+            jugadorSelect.innerHTML = "";
+            data.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.value;
+                opt.text = item.text;
+                jugadorSelect.appendChild(opt);
+            });
+        });
+
+        document.getElementById("filtros-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const temporada = temporadaSelect.value;
+            const jugador = jugadorSelect.value;
+
+            const res = await fetch(`/Graficos/ObtenerRendimientoJugador?temporadaId=${temporada}&jugadorId=${jugador}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+
+            if (chart) chart.destroy();
+
+            chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: "Estadísticas",
+                        data: data.datos,
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rendimiento del Jugador'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            suggestedMax: Math.max(...data.datos) + 5
+                        }
+                    }
+                }
+            });
+        });
+
+        // Carga inicial
+        window.onload = () => temporadaSelect.dispatchEvent(new Event("change"));
+    </script>
+}

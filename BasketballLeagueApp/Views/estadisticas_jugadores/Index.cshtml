@@ -1,0 +1,100 @@
+﻿@model List<BasketballLeagueApp.Models.ViewModels.EstadisticaJugadorResultadoVM>
+
+@{
+    ViewData["Title"] = "Estadísticas de Jugadores";
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Estadísticas de Jugadores</h2>
+
+    <form asp-action="Index" method="get" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <label for="temporadaId" class="form-label">Temporada</label>
+                @Html.DropDownList("temporadaId", ViewBag.Temporadas as SelectList, "Seleccione una temporada", new { @class = "form-select", id = "temporadaId" })
+            </div>
+            <div class="col-md-4">
+                <label for="equipoId" class="form-label">Equipo</label>
+                @Html.DropDownList("equipoId", ViewBag.Equipos as SelectList, "Seleccione un equipo", new { @class = "form-select", id = "equipoId" })
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            </div>
+        </div>
+    </form>
+
+    @if (ViewBag.SeHaBuscado == true)
+    {
+        if (!Model.Any())
+        {
+            <div class="alert alert-warning text-center">
+                No se encontraron estadísticas para los filtros seleccionados.
+            </div>
+        }
+        else
+        {
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th>Jugador</th>
+                        <th>Equipo</th>
+                        <th>Minutos</th>
+                        <th>Puntos</th>
+                        <th>Rebotes</th>
+                        <th>Asistencias</th>
+                        <th>Robos</th>
+                        <th>Bloqueos</th>
+                        <th>Faltas</th>
+                    </tr>
+                </thead>
+                <tbody class="text-center">
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.NombreJugador</td>
+                            <td>@item.Equipo</td>
+                            <td>@item.Minutos</td>
+                            <td>@item.Puntos</td>
+                            <td>@item.Rebotes</td>
+                            <td>@item.Asistencias</td>
+                            <td>@item.Robos</td>
+                            <td>@item.Bloqueos</td>
+                            <td>@item.Faltas</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#temporadaId').change(function () {
+                const temporadaId = $(this).val();
+
+                if (temporadaId) {
+                    $.ajax({
+                        url: '/estadisticas_jugadores/ObtenerEquiposPorTemporada', // Asegúrate de que esta ruta sea correcta según tu controlador
+                        type: 'GET',
+                        data: { temporadaId: temporadaId },
+                        success: function (equipos) {
+                            const $equipoId = $('#equipoId');
+                            $equipoId.empty().append('<option value="">Seleccione un equipo</option>');
+                            equipos.forEach(e => {
+                                $equipoId.append(`<option value="${e.id}">${e.nombre}</option>`);
+                            });
+                        },
+                        error: function () {
+                            alert('Error al cargar los equipos.');
+                        }
+                    });
+                } else {
+                    $('#equipoId').empty().append('<option value="">Seleccione un equipo</option>');
+                }
+            });
+        });
+    </script>
+}

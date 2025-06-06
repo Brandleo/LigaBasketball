@@ -1,0 +1,131 @@
+﻿@model BasketballLeagueApp.Models.jugadores
+
+@{
+    ViewData["Title"] = "Detalles del Jugador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+
+}
+<div class="bg-secondary" style="--bs-bg-opacity: .1; height: 89vh">
+    <div class="container mt-4 bg-white rounded-3">
+        <br />
+        <h1 class="text-center">Detalles del Jugador</h1>
+        <br />
+
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">@Model.nombre @Model.apellido</h4>
+
+                <div class="form-group">
+                    <img src="@Model.img"
+                         width="250" height="250"
+                         alt="Imagen de @Model.nombre" />
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3">
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nombre)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nombre)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.apellido)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.apellido)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.fecha_nacimiento)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.fecha_nacimiento)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nacionalidad)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nacionalidad)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.dorsal)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.dorsal)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.estatura)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.estatura)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.peso)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.peso)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.posicion)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.posicion)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.estado)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.estado)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            Equipo
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Model.equipo.nombre
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">@Model.equipo.nombre </h4>
+
+                <div class="form-group">
+                    <img
+                         src="@ViewBag.equipoImg"
+                         width="250" height="250"
+                         alt="Logo de @Model.equipo.nombre" />
+                </div>
+            </div>
+
+
+            @*
+            agregar aqui mas cosas, estadisticas etc
+            *@
+
+
+        </div>
+
+        <br />
+        <div class="form-group text-center">
+            <a asp-action="Edit" asp-route-id="@Model?.id" class="btn btn-warning px-4">
+                <i class="bi bi-pencil-square"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary px-4">
+                <i class="bi bi-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+        <br />
+    </div>
+</div>
+

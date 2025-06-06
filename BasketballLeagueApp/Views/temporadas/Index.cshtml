@@ -1,0 +1,511 @@
+﻿@model IEnumerable<BasketballLeagueApp.Models.temporadas>
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Temporadas";
+}
+
+<!-- Mensajes de estado -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong>Errores de validación:</strong>
+        <ul class="mb-0 mt-2">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<div class="container-fluid mt-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0 text-primary">
+                        <i class="bi bi-calendar-event me-2"></i>Gestión de Temporadas
+                    </h2>
+                    <p class="text-muted mb-0">Administra las temporadas de la liga</p>
+                </div>
+                <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+                    <i class="bi bi-plus-lg me-2"></i>Nueva Temporada
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros y búsqueda -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3" id="filtrosForm">
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                <i class="bi bi-search me-1"></i>Buscar temporada
+                            </label>
+                            <input type="text" class="form-control" name="busqueda" 
+                                   placeholder="Nombre de temporada..." 
+                                   value="@ViewBag.BusquedaActual">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-calendar me-1"></i>Año de inicio
+                            </label>
+                            <select class="form-select" name="anioInicio">
+                                <option value="">Todos los años</option>
+                                @for (int i = DateTime.Now.Year; i >= 2000; i--)
+                                {
+                                    <option value="@i" selected="@(ViewBag.AnioInicioFiltro == i)">@i</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">
+                                <i class="bi bi-trophy me-1"></i>Estado
+                            </label>
+                            <select class="form-select" name="estado">
+                                <option value="">Todas</option>
+                                <option value="activa" selected="@(ViewBag.EstadoFiltro == "activa")">Activa</option>
+                                <option value="finalizada" selected="@(ViewBag.EstadoFiltro == "finalizada")">Finalizada</option>
+                                <option value="futura" selected="@(ViewBag.EstadoFiltro == "futura")">Futura</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <div class="btn-group w-100">
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="bi bi-funnel"></i>
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-primary text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Total Temporadas</h6>
+                            <h3 class="mb-0">@Model.Count()</h3>
+                        </div>
+                        <i class="bi bi-calendar-event fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-success text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Finalizadas</h6>
+                            <h3 class="mb-0">@Model.Count(t => t.campeon_id != null)</h3>
+                        </div>
+
+                        <i class="bi bi-check-circle fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-warning text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">En Curso</h6>
+                            <h3 class="mb-0">@Model.Count(t => t.campeon_id == null)</h3>
+                        </div>
+                        <i class="bi bi-play-circle fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card bg-info text-white shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title mb-0">Futuras</h6>
+                            <h3 class="mb-0">@Model.Count(t => t.anio_inicio > DateTime.Now.Year)</h3>
+                        </div>
+                        <i class="bi bi-clock fs-2 opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de temporadas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-table me-2"></i>Lista de Temporadas
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="exportarDatos()">
+                                <i class="bi bi-download me-1"></i>Exportar
+                            </button>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-gear me-1"></i>Configurar
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="toggleColumn('campeon')">
+                                        <i class="bi bi-eye"></i> Mostrar/Ocultar Campeón
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="toggleColumn('acciones')">
+                                        <i class="bi bi-eye"></i> Mostrar/Ocultar Acciones
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (Model.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0" id="temporadasTable">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th class="sortable" data-column="nombre">
+                                            <i class="bi bi-tag me-1"></i>
+                                            @Html.DisplayNameFor(model => model.First().nombre)
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-column="anio_inicio">
+                                            <i class="bi bi-calendar-date me-1"></i>
+                                            @Html.DisplayNameFor(model => model.First().anio_inicio)
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="sortable" data-column="anio_fin">
+                                            <i class="bi bi-calendar-date me-1"></i>
+                                            @Html.DisplayNameFor(model => model.First().anio_fin)
+                                            <i class="bi bi-chevron-expand sort-icon"></i>
+                                        </th>
+                                        <th class="campeon-column">
+                                            <i class="bi bi-trophy me-1"></i>Campeón
+                                        </th>
+                                        <th class="text-center">
+                                            <i class="bi bi-circle-fill me-1" style="font-size: 6px;"></i>Estado
+                                        </th>
+                                        <th class="text-center acciones-column">
+                                            <i class="bi bi-gear me-1"></i>Acciones
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model)
+                                    {
+                                        var estado = "";
+                                        var badgeClass = "";
+                                        var currentYear = DateTime.Now.Year;
+                                        
+                                        if (item.anio_fin < currentYear)
+                                        {
+                                            estado = "Finalizada";
+                                            badgeClass = "bg-success";
+                                        }
+                                        else if (item.anio_inicio <= currentYear && item.anio_fin >= currentYear)
+                                        {
+                                            estado = "En Curso";
+                                            badgeClass = "bg-warning";
+                                        }
+                                        else
+                                        {
+                                            estado = "Futura";
+                                            badgeClass = "bg-info";
+                                        }
+
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="me-3">
+                                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                             style="width: 40px; height: 40px;">
+                                                            <i class="bi bi-calendar-event"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <strong>@item.nombre</strong>
+                                                        <br>
+                                                        <small class="text-muted">ID: @item.id</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@item.anio_inicio</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">@item.anio_fin</span>
+                                            </td>
+                                            <td class="campeon-column">
+                                                @if (item.campeon != null)
+                                                {
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-trophy text-warning me-2"></i>
+                                                        <strong class="text-primary">@item.campeon.nombre</strong>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <span class="text-muted">
+                                                        <i class="bi bi-dash-circle me-1"></i>Sin asignar
+                                                    </span>
+                                                }
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge @badgeClass">@estado</span>
+                                            </td>
+                                            <td class="text-center acciones-column">
+                                                <div class="btn-group" role="group">
+                                                    <a asp-action="Details" asp-route-id="@item.id" 
+                                                       class="btn btn-outline-info btn-sm" 
+                                                       title="Ver detalles">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a asp-action="Edit" asp-route-id="@item.id" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="Editar">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-danger btn-sm" 
+                                                            title="Eliminar"
+                                                            onclick="confirmarEliminacion(@item.id, '@item.nombre')">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="bi bi-calendar-x text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No hay temporadas registradas</h4>
+                            <p class="text-muted">Comienza creando tu primera temporada</p>
+                            <a asp-action="Create" class="btn btn-primary">
+                                <i class="bi bi-plus-lg me-2"></i>Crear Primera Temporada
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación de eliminación -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Confirmar Eliminación
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar la temporada <strong id="temporadaNombre"></strong>?</p>
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Esta acción no se puede deshacer y eliminará todos los datos asociados.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="post" id="deleteForm" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="_method" value="delete" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Funcionalidad de ordenamiento
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('temporadasTable');
+    const headers = table.querySelectorAll('th.sortable');
+    
+    headers.forEach(header => {
+        header.addEventListener('click', function() {
+            const column = this.dataset.column;
+            const sortIcon = this.querySelector('.sort-icon');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Determinar dirección de ordenamiento
+            let ascending = true;
+            if (sortIcon.classList.contains('bi-chevron-up')) {
+                ascending = false;
+            }
+            
+            // Resetear iconos
+            headers.forEach(h => {
+                const icon = h.querySelector('.sort-icon');
+                icon.className = 'bi bi-chevron-expand sort-icon';
+            });
+            
+            // Establecer icono actual
+            sortIcon.className = ascending ? 'bi bi-chevron-up sort-icon' : 'bi bi-chevron-down sort-icon';
+            
+            // Ordenar filas
+            rows.sort((a, b) => {
+                const aValue = a.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
+                const bValue = b.querySelector(`td:nth-child(${getColumnIndex(column)})`).textContent.trim();
+                
+                if (column === 'anio_inicio' || column === 'anio_fin') {
+                    return ascending ? 
+                        parseInt(aValue) - parseInt(bValue) : 
+                        parseInt(bValue) - parseInt(aValue);
+                } else {
+                    return ascending ? 
+                        aValue.localeCompare(bValue) : 
+                        bValue.localeCompare(aValue);
+                }
+            });
+            
+            // Reemplazar filas ordenadas
+            rows.forEach(row => tbody.appendChild(row));
+        });
+    });
+});
+
+function getColumnIndex(column) {
+    const columns = { 'nombre': 1, 'anio_inicio': 2, 'anio_fin': 3 };
+    return columns[column] || 1;
+}
+
+// Confirmación de eliminación
+function confirmarEliminacion(id, nombre) {
+    document.getElementById('temporadaNombre').textContent = nombre;
+    document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + id;
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Mostrar/ocultar columnas
+function toggleColumn(columnClass) {
+    const elements = document.querySelectorAll('.' + columnClass + '-column');
+    elements.forEach(element => {
+        element.style.display = element.style.display === 'none' ? '' : 'none';
+    });
+}
+
+// Exportar datos (placeholder)
+function exportarDatos() {
+    alert('Funcionalidad de exportación - implementar según necesidades');
+}
+
+// Auto-dismiss alerts
+setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        if (alert.querySelector('.btn-close')) {
+            bootstrap.Alert.getOrCreateInstance(alert).close();
+        }
+    });
+}, 5000);
+</script>
+
+<style>
+.sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortable:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sort-icon {
+    float: right;
+    margin-top: 2px;
+    font-size: 0.8em;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.btn-group .btn {
+    border-radius: 0.25rem;
+    margin: 0 1px;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+
+.alert {
+    border-left: 4px solid;
+}
+
+.alert-success {
+    border-left-color: #28a745;
+}
+
+.alert-danger {
+    border-left-color: #dc3545;
+}
+
+@@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin: 1px 0;
+    }
+    
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+</style>

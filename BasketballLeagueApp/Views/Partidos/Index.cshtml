@@ -1,0 +1,727 @@
+﻿<script>
+    // Variables globales para filtros
+    let partidosOriginales = [];
+    let filtrosActivos = false;
+
+    // Inicializar al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        // Capturar datos originales para filtrado
+        const filas = document.querySelectorAll('.partido-row');
+        partidosOriginales = Array.from(filas).map(fila => ({
+            elemento: fila,
+            equipoLocal: fila.dataset.equipoLocal,
+            equipoVisitante: fila.dataset.equipoVisitante,
+            estado: fila.dataset.estado,
+            puntosTotal: parseInt(fila.dataset.puntosTotal),
+            diferencia: parseInt(fila.dataset.diferencia),
+            fecha: fila.dataset.fecha,
+            hora: fila.dataset.hora,
+                 temporada: fila.dataset.temporada
+        }));
+        
+        updatePuntosLabel();
+    });
+
+    function toggleFiltros() {
+        const content = document.getElementById('filtrosContent');
+        const icon = document.getElementById('filtrosIcon');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            content.style.display = 'none';
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
+
+    function updatePuntosLabel() {
+        const slider = document.getElementById('puntosMinimos');
+        const label = document.getElementById('puntosLabel');
+        label.textContent = slider.value;
+    }
+
+    function aplicarFiltros() {
+        const filtros = obtenerFiltros();
+        const partidosFiltrados = filtrarPartidos(partidosOriginales, filtros);
+        mostrarResultados(partidosFiltrados);
+        actualizarContadores(partidosFiltrados);
+        filtrosActivos = tienesFiltrosActivos(filtros);
+    }
+
+    function obtenerFiltros() {
+        return {
+            equipo: document.getElementById('filtroEquipo').value.toLowerCase(),
+            fechaDesde: document.getElementById('fechaDesde').value,
+            fechaHasta: document.getElementById('fechaHasta').value,
+            estado: document.getElementById('filtroEstado').value.toLowerCase(),
+            puntosMinimos: parseInt(document.getElementById('puntosMinimos').value),
+            tipoPartido: document.getElementById('tipoPartido').value,
+            busquedaTexto: document.getElementById('busquedaTexto').value.toLowerCase(),
+                temporada: document.getElementById('filtroTemporada').value.toLowerCase()
+        };
+    }
+
+    function filtrarPartidos(partidos, filtros) {
+        return partidos.filter(partido => {
+            // Filtro por equipo
+            if (filtros.equipo && 
+                !partido.equipoLocal.includes(filtros.equipo) && 
+                !partido.equipoVisitante.includes(filtros.equipo)) {
+                return false;
+            }
+
+            // Filtro por rango de fechas
+            if (filtros.fechaDesde && partido.fecha < filtros.fechaDesde) {
+                return false;
+            }
+            if (filtros.fechaHasta && partido.fecha > filtros.fechaHasta) {
+                return false;
+            }
+
+            // Filtro por estado
+            if (filtros.estado && !partido.estado.includes(filtros.estado)) {
+                return false;
+            }
+
+            // Filtro por puntos mínimos
+            if (partido.puntosTotal < filtros.puntosMinimos) {
+                return false;
+            }
+
+            // Filtro por tipo de partido
+            switch (filtros.tipoPartido) {
+                case 'reñido':
+                    if (partido.diferencia > 10) return false;
+                    break;
+                case 'normal':
+                    if (partido.diferencia <= 10 || partido.diferencia > 20) return false;
+                    break;
+                case 'aplastante':
+                    if (partido.diferencia <= 20) return false;
+                    break;
+            }
+
+            // Filtro por búsqueda de texto
+            if (filtros.busquedaTexto) {
+                const textoCompleto = `${partido.equipoLocal} ${partido.equipoVisitante}`.toLowerCase();
+                if (!textoCompleto.includes(filtros.busquedaTexto)) {
+                    return false;
+                }
+            }
+
+            if (filtros.temporada && (!partido.temporada || !partido.temporada.toLowerCase().includes(filtros.temporada))) {
+                return false;
+            }
+
+            return true;
+        });
+    }
+
+    function mostrarResultados(partidosFiltrados) {
+        // Ocultar todos los partidos y fechas primero
+        const todasLasFilas = document.querySelectorAll('.partido-row');
+        const todasLasFechas = document.querySelectorAll('.fecha-card');
+        
+        todasLasFilas.forEach(fila => fila.style.display = 'none');
+        todasLasFechas.forEach(fecha => fecha.style.display = 'none');
+
+        // Mostrar partidos filtrados y sus fechas correspondientes
+        const fechasConPartidos = new Set();
+        
+        partidosFiltrados.forEach(partido => {
+            partido.elemento.style.display = '';
+            fechasConPartidos.add(partido.fecha);
+        });
+
+        // Mostrar solo las fechas que tienen partidos visibles
+        todasLasFechas.forEach(fechaCard => {
+            const fechaKey = fechaCard.dataset.fecha;
+            if (fechasConPartidos.has(fechaKey)) {
+                fechaCard.style.display = '';
+                // Actualizar contador de partidos por fecha
+                const partidosEnEstaFecha = partidosFiltrados.filter(p => p.fecha === fechaKey).length;
+                const contadores = fechaCard.querySelectorAll('.partidos-count, .partidos-count-footer');
+                contadores.forEach(contador => {
+                    contador.textContent = `${partidosEnEstaFecha} partido${partidosEnEstaFecha !== 1 ? 's' : ''}`;
+                });
+            }
+        });
+
+        // Mostrar/ocultar mensaje de "no resultados"
+        const noResultados = document.getElementById('noResultados');
+        const contenidoPartidos = document.getElementById('contenidoPartidos');
+        
+        if (partidosFiltrados.length === 0) {
+            noResultados.classList.remove('d-none');
+            contenidoPartidos.style.display = 'none';
+        } else {
+            noResultados.classList.add('d-none');
+            contenidoPartidos.style.display = 'block';
+        }
+    }
+
+    function actualizarContadores(partidosFiltrados) {
+        const contadorResultados = document.getElementById('contadorResultados');
+        const textoResultados = document.getElementById('textoResultados');
+        
+        if (partidosFiltrados.length < partidosOriginales.length) {
+            const totalOriginal = partidosOriginales.length;
+            const totalFiltrado = partidosFiltrados.length;
+            const fechasUnicas = new Set(partidosFiltrados.map(p => p.fecha)).size;
+            
+            textoResultados.innerHTML = `
+                Mostrando <strong>${totalFiltrado}</strong> de <strong>${totalOriginal}</strong> partidos 
+                en <strong>${fechasUnicas}</strong> fecha${fechasUnicas !== 1 ? 's' : ''}.
+            `;
+            contadorResultados.classList.remove('d-none');
+        } else {
+            contadorResultados.classList.add('d-none');
+        }
+    }
+
+    function tienesFiltrosActivos(filtros) {
+        return filtros.equipo || 
+               filtros.estado || 
+               filtros.puntosMinimos > 0 || 
+               filtros.tipoPartido || 
+               filtros.busquedaTexto ||
+               filtros.fechaDesde !== document.getElementById('fechaDesde').getAttribute('min') ||
+               filtros.fechaHasta !== document.getElementById('fechaHasta').getAttribute('max');
+    }
+
+    function limpiarFiltros() {
+        // Resetear todos los controles de filtro
+        document.getElementById('filtroEquipo').value = '';
+        document.getElementById('filtroEstado').value = '';
+        document.getElementById('puntosMinimos').value = 0;
+        document.getElementById('tipoPartido').value = '';
+        document.getElementById('busquedaTexto').value = '';
+        
+        // Resetear fechas a los valores originales
+        const fechas = partidosOriginales.map(p => p.fecha).sort();
+        document.getElementById('fechaDesde').value = fechas[0];
+        document.getElementById('fechaHasta').value = fechas[fechas.length - 1];
+        
+        updatePuntosLabel();
+        
+        // Mostrar todos los partidos
+        mostrarResultados(partidosOriginales);
+        document.getElementById('contadorResultados').classList.add('d-none');
+        
+        filtrosActivos = false;
+    }
+
+    function limpiarBusqueda() {
+        document.getElementById('busquedaTexto').value = '';
+        aplicarFiltros();
+    }
+
+    function toggleView() {
+        // Implementar vista compacta
+        const tablas = document.querySelectorAll('.table');
+        tablas.forEach(tabla => {
+            tabla.classList.toggle('table-sm');
+        });
+        
+        const cards = document.querySelectorAll('.card-footer');
+        cards.forEach(footer => {
+            footer.style.display = footer.style.display === 'none' ? '' : 'none';
+        });
+    }
+    
+    function exportData() {
+        // Obtener partidos visibles
+        const partidosVisibles = partidosOriginales.filter(partido => 
+            partido.elemento.style.display !== 'none'
+        );
+        
+        // Crear datos CSV
+        const headers = ['Fecha', 'Hora', 'Equipo Local', 'Puntos Local', 'Equipo Visitante', 'Puntos Visitante', 'Estado'];
+        const csvData = [headers];
+        
+        partidosVisibles.forEach(partido => {
+            const fila = partido.elemento;
+            const celdas = fila.querySelectorAll('td');
+            csvData.push([
+                partido.fecha,
+                celdas[0].textContent.trim(),
+                celdas[1].textContent.trim(),
+                celdas[2].textContent.trim(),
+                celdas[4].textContent.trim(),
+                celdas[5].textContent.trim(),
+                celdas[6].textContent.trim()
+            ]);
+        });
+        
+        // Crear y descargar archivo CSV
+        const csvContent = csvData.map(row => row.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `partidos_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Atajos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'f') {
+            e.preventDefault();
+            document.getElementById('busquedaTexto').focus();
+        }
+        if (e.key === 'Escape' && filtrosActivos) {
+            limpiarFiltros();
+        }
+    });
+</script>
+@model List<BasketballLeagueApp.Models.partidos>
+@{
+    ViewData["Title"] = "Resumen de Partidos";
+}
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold text-primary mb-0">
+                    <i class="fas fa-basketball-ball me-2"></i>
+                    Resumen de Partidos Finalizados
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="toggleView()">
+                        <i class="fas fa-th-list me-1"></i>
+                        Vista Compacta
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="exportData()">
+                        <i class="fas fa-download me-1"></i>
+                        Exportar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Filtros -->
+            <div class="card shadow-sm mb-4 border-0" id="filtrosPanel">
+                <div class="card-header bg-white border-bottom">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-semibold text-secondary">
+                            <i class="fas fa-filter me-2"></i>
+                            Filtros de Búsqueda
+                        </h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="toggleFiltros()">
+                            <i class="fas fa-chevron-up" id="filtrosIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filtro por Temporada -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label fw-semibold">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Temporada
+                    </label>
+                    <select class="form-select" id="filtroTemporada" onchange="aplicarFiltros()">
+                        <option value="">Todas las temporadas</option>
+                        @foreach (var temporada in Model
+                        .Where(p => p.temporada != null && p.temporada.nombre != null)
+                        .Select(p => p.temporada.nombre)
+                        .Distinct()
+                        .OrderBy(t => t))
+
+                        {
+                            <option value="@temporada.ToLower()">@temporada</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="card-body" id="filtrosContent">
+                    <div class="row g-3">
+                        <!-- Filtro por Equipo -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-users me-1"></i>
+                                Equipo
+                            </label>
+                            <select class="form-select" id="filtroEquipo" onchange="aplicarFiltros()">
+                                <option value="">Todos los equipos</option>
+                                @foreach (var equipo in Model.SelectMany(p => new[] { p.equipo_local.nombre, p.equipo_visitante.nombre }).Distinct().OrderBy(e => e))
+                                {
+                                    <option value="@equipo">@equipo</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Filtro por Rango de Fechas -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                Desde
+                            </label>
+                            <input type="date" class="form-control" id="fechaDesde" 
+                                   value="@Model.Min(p => p.fecha).ToString("yyyy-MM-dd")" 
+                                   onchange="aplicarFiltros()">
+                        </div>
+
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-calendar-check me-1"></i>
+                                Hasta
+                            </label>
+                            <input type="date" class="form-control" id="fechaHasta" 
+                                   value="@Model.Max(p => p.fecha).ToString("yyyy-MM-dd")" 
+                                   onchange="aplicarFiltros()">
+                        </div>
+
+                        <!-- Filtro por Estado -->
+                        <div class="col-lg-3 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-flag me-1"></i>
+                                Estado
+                            </label>
+                            <select class="form-select" id="filtroEstado" onchange="aplicarFiltros()">
+                                <option value="">Todos los estados</option>
+                                @foreach (var estado in Model.Select(p => p.estado).Distinct().OrderBy(e => e))
+                                {
+                                    <option value="@estado">@estado</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Filtro por Rango de Puntos -->
+                        <div class="col-lg-4 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-sort-numeric-up me-1"></i>
+                                Puntos Mínimos Totales
+                            </label>
+                            <input type="range" class="form-range" id="puntosMinimos" 
+                                   min="0" max="@Model.Max(p => p.puntos_local + p.puntos_visitante)" 
+                                   value="0" oninput="updatePuntosLabel(); aplicarFiltros()">
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">0</small>
+                                <small class="text-primary fw-bold" id="puntosLabel">0</small>
+                                <small class="text-muted">@Model.Max(p => p.puntos_local + p.puntos_visitante)</small>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por Diferencia de Puntos -->
+                        <div class="col-lg-4 col-md-6">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-balance-scale me-1"></i>
+                                Tipo de Partido
+                            </label>
+                            <select class="form-select" id="tipoPartido" onchange="aplicarFiltros()">
+                                <option value="">Todos</option>
+                                <option value="reñido">Reñidos (≤ 10 pts)</option>
+                                <option value="normal">Normales (11-20 pts)</option>
+                                <option value="aplastante">Aplastantes (> 20 pts)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Búsqueda por Texto -->
+                        <div class="col-lg-4 col-md-12">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-search me-1"></i>
+                                Búsqueda
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="busquedaTexto" 
+                                       placeholder="Buscar equipo..." onkeyup="aplicarFiltros()">
+                                <button class="btn btn-outline-secondary" type="button" onclick="limpiarBusqueda()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones de Acción -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <button class="btn btn-outline-danger btn-sm" onclick="limpiarFiltros()">
+                                    <i class="fas fa-eraser me-1"></i>
+                                    Limpiar Filtros
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="aplicarFiltros()">
+                                    <i class="fas fa-search me-1"></i>
+                                    Aplicar Filtros
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contador de Resultados -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <div class="alert alert-info d-none" id="contadorResultados">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <span id="textoResultados"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center py-5">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h4>No hay partidos finalizados</h4>
+                    <p class="mb-0">Los partidos aparecerán aquí una vez que sean completados.</p>
+                </div>
+            }
+            else
+            {
+                <div id="contenidoPartidos">
+                @foreach (var fecha in Model.GroupBy(p => p.fecha).OrderByDescending(g => g.Key))
+                {
+                    <div class="card shadow-sm mb-4 border-0 fecha-card" data-fecha="@fecha.Key.ToString("yyyy-MM-dd")">
+                        <div class="card-header bg-gradient-primary text-white py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h4 class="mb-0 fw-semibold">
+                                    <i class="fas fa-calendar-day me-2"></i>
+                                    @fecha.Key.ToString("dddd, dd 'de' MMMM 'de' yyyy", new System.Globalization.CultureInfo("es-ES"))
+                                </h4>
+                                <span class="badge bg-light text-dark partidos-count">
+                                    @fecha.Count() partido@(fecha.Count() != 1 ? "s" : "")
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th class="text-center" style="width: 80px;">
+                                                <i class="fas fa-clock me-1"></i>Hora
+                                            </th>
+                                            <th style="width: 25%;">Equipo Local</th>
+                                            <th class="text-center" style="width: 80px;">Puntos</th>
+                                            <th class="text-center" style="width: 40px;"></th>
+                                            <th class="text-center" style="width: 80px;">Puntos</th>
+                                            <th style="width: 25%;">Equipo Visitante</th>
+                                            <th class="text-center" style="width: 100px;">Estado</th>
+                                            <th class="text-center" style="width: 80px;">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var partido in fecha.OrderBy(p => p.hora))
+                                        {
+                                            var esGanadorLocal = partido.puntos_local > partido.puntos_visitante;
+                                            var esGanadorVisitante = partido.puntos_visitante > partido.puntos_local;
+                                            var esEmpate = partido.puntos_local == partido.puntos_visitante;
+                                            var totalPuntos = partido.puntos_local + partido.puntos_visitante;
+                                                var diferenciaPuntos = Math.Abs(partido.puntos_local.GetValueOrDefault() - partido.puntos_visitante.GetValueOrDefault());
+
+                                            
+                                            <tr class="align-middle partido-row" 
+                                                data-equipo-local="@partido.equipo_local.nombre.ToLower()" 
+                                                data-equipo-visitante="@partido.equipo_visitante.nombre.ToLower()"
+                                                data-estado="@partido.estado.ToLower()"
+                                                data-puntos-total="@totalPuntos"
+                                                data-diferencia="@diferenciaPuntos"
+                                                data-fecha="@partido.fecha.ToString("yyyy-MM-dd")"
+                                                data-hora="@partido.hora.ToString("HH:mm")"
+                                                    data-temporada="@partido.temporada?.nombre?.ToLower()">
+                                                   
+                                                <td class="text-center fw-semibold">
+                                                    @partido.hora.ToString("HH:mm")
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-2">
+                                                            @if (esGanadorLocal)
+                                                            {
+                                                                <i class="fas fa-trophy text-warning me-1"></i>
+                                                            }
+                                                            <span class="fw-@(esGanadorLocal ? "bold" : "normal") equipo-nombre">
+                                                                @partido.equipo_local.nombre
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-@(esGanadorLocal ? "success" : "secondary") fs-6 px-3 py-2">
+                                                        @partido.puntos_local
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="text-muted fw-bold">VS</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-@(esGanadorVisitante ? "success" : "secondary") fs-6 px-3 py-2">
+                                                        @partido.puntos_visitante
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="me-2">
+                                                            @if (esGanadorVisitante)
+                                                            {
+                                                                <i class="fas fa-trophy text-warning me-1"></i>
+                                                            }
+                                                            <span class="fw-@(esGanadorVisitante ? "bold" : "normal") equipo-nombre">
+                                                                @partido.equipo_visitante.nombre
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-@(GetEstadoBadgeColor(partido.estado)) rounded-pill">
+                                                        @partido.estado
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="dropdown">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>Ver Detalles</a></li>
+                                                            <li><a class="dropdown-item" href="#"><i class="fas fa-chart-bar me-2"></i>Estadísticas</a></li>
+                                                            <li><hr class="dropdown-divider"></li>
+                                                            <li><a class="dropdown-item" href="#"><i class="fas fa-share me-2"></i>Compartir</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-light fecha-footer">
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <small class="text-muted">Total de partidos</small>
+                                    <div class="fw-bold partidos-count-footer">@fecha.Count()</div>
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Promedio de puntos</small>
+                                        <div class="fw-bold">@(((double)fecha.Sum(p => (p.puntos_local ?? 0) + (p.puntos_visitante ?? 0)) / fecha.Count()).ToString("F1"))</div>
+
+                                </div>
+                                <div class="col-4">
+                                    <small class="text-muted">Partido más reñido</small>
+                                        <div class="fw-bold">
+                                            @(fecha.Min(p => Math.Abs(p.puntos_local.GetValueOrDefault() - p.puntos_visitante.GetValueOrDefault()))) pts
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                </div>
+
+                <!-- Mensaje cuando no hay resultados -->
+                <div class="alert alert-warning text-center py-5 d-none" id="noResultados">
+                    <i class="fas fa-search fa-2x mb-3"></i>
+                    <h4>No se encontraron partidos</h4>
+                    <p class="mb-0">Intenta ajustar los filtros para ver más resultados.</p>
+                    <button class="btn btn-outline-primary mt-2" onclick="limpiarFiltros()">
+                        <i class="fas fa-eraser me-1"></i>
+                        Limpiar Filtros
+                    </button>
+                </div>
+
+                <!-- Resumen General -->
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Resumen General
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="border rounded p-3 bg-white">
+                                    <i class="fas fa-basketball-ball text-primary fa-2x mb-2"></i>
+                                    <h4 class="fw-bold text-primary">@Model.Count()</h4>
+                                    <small class="text-muted">Total Partidos</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="border rounded p-3 bg-white">
+                                    <i class="fas fa-fire text-danger fa-2x mb-2"></i>
+                                    <h4 class="fw-bold text-danger">@Model.Sum(p => p.puntos_local + p.puntos_visitante)</h4>
+                                    <small class="text-muted">Puntos Totales</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="border rounded p-3 bg-white">
+                                    <i class="fas fa-trophy text-warning fa-2x mb-2"></i>
+                                    <h4 class="fw-bold text-warning">
+                                        @(((double)Model.Sum(p => (p.puntos_local ?? 0) + (p.puntos_visitante ?? 0)) / Model.Count()).ToString("F1"))
+                                    </h4>
+                                    <small class="text-muted">Promedio por Partido</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <div class="border rounded p-3 bg-white">
+                                    <i class="fas fa-calendar text-success fa-2x mb-2"></i>
+                                    <h4 class="fw-bold text-success">@Model.GroupBy(p => p.fecha).Count()</h4>
+                                    <small class="text-muted">Días de Juego</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetEstadoBadgeColor(string estado)
+    {
+        return estado?.ToLower() switch
+        {
+            "finalizado" => "success",
+            "completado" => "success", 
+            "terminado" => "success",
+            "suspendido" => "warning",
+            "cancelado" => "danger",
+            _ => "primary"
+        };
+    }
+}
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0,123,255,.075);
+        transition: all 0.2s ease;
+    }
+    
+    .card {
+        transition: transform 0.2s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .badge {
+        font-size: 0.85em;
+    }
+    
+    .dropdown-toggle:after {
+        display: none;
+    }
+</style>
+
+<script>
+    function toggleView() {
+        // Implementar vista compacta
+        console.log('Cambiar vista');
+    }
+    
+    function exportData() {
+        // Implementar exportación
+        console.log('Exportar datos');
+    }
+</script>

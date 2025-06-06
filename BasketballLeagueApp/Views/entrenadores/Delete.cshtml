@@ -1,0 +1,106 @@
+﻿@model BasketballLeagueApp.Models.entrenadores
+
+@{
+    ViewData["Title"] = "Eliminar Entrenador";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+
+}
+
+<div class="bg-secondary" style="--bs-bg-opacity: .1; height: 89vh">
+    <div class="container mt-4 bg-white rounded-3">
+        <br />
+        <h1 class="text-center text-danger">Eliminar Entrenador</h1>
+        <br />
+
+        <div class="row">
+            <!-- Información del entrenador -->
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">@Model.nombre @Model.apellido</h4>
+
+                <div class="form-group">
+                    <h5 class="text-muted">Información del Entrenador</h5>
+                    <br />
+                </div>
+
+                @{
+                    var historial0 = Model.historial_entrenadores?.FirstOrDefault();
+                }
+
+                @if (historial0?.equipo != null)
+                {
+                    <p class="text-muted"><strong>Equipo:</strong> @historial0.equipo.nombre</p>
+                }
+
+                @if (historial0?.temporada != null)
+                {
+                    <p class="text-muted"><strong>Temporada:</strong> @historial0.temporada.nombre</p>
+                }
+            </div>
+
+            <!-- Datos del entrenador -->
+            <div class="col-md-4">
+                <div class="card shadow-sm p-3 border-danger">
+                    <h4 class="text-center text-danger">¿Estás seguro de eliminar este entrenador?</h4>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nombre)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nombre)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.apellido)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.apellido)
+                        </dd>
+
+                        <dt class="col-sm-4 fw-bold">
+                            @Html.DisplayNameFor(model => model.nacionalidad)
+                        </dt>
+                        <dd class="col-sm-8">
+                            @Html.DisplayFor(model => model.nacionalidad)
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Información adicional -->
+            <div class="col-md-4 text-center">
+                <h4 class="text-secondary">Equipo</h4>
+
+                @{
+                    var historial = Model.historial_entrenadores?.FirstOrDefault();
+                }
+
+                @if (historial?.equipo != null)
+                {
+                    <div class="form-group mb-3">
+                        <img src="@historial.equipo.img"
+                             alt="Imagen del equipo"
+                             width="200" height="200"
+                             class="rounded border mb-2" />
+                    </div>
+                }
+            </div>
+
+        </div>
+
+        <br />
+        <!-- Botones de acción -->
+        <div class="form-group text-center">
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="id" />
+                <button type="submit" class="btn btn-danger px-4">
+                    <i class="bi bi-trash"></i> Confirmar Eliminación
+                </button>
+                <a asp-action="Index" class="btn btn-secondary px-4">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+            </form>
+        </div>
+        <br />
+    </div>
+</div>

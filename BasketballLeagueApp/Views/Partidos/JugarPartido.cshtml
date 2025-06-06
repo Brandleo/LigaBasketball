@@ -1,0 +1,529 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+@model JugarPartidoViewModel
+
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Jugar Partido";
+}
+
+<h2 class="text-center mt-4">Jugar Partido</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    <script>
+        setTimeout(() => window.location.href = '@Url.Action("ListarJornadas", "Partidos")', 3600);
+    </script>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estadísticas del Partido</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            margin: 20px auto;
+            max-width: 1400px;
+            padding: 30px;
+        }
+        
+        .header-card {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+        }
+        
+        .vs-badge {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 8px 20px;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .team-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .team-header {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .team-header.visitante {
+            background: linear-gradient(135deg, #00b894, #00a085);
+        }
+        
+        .stats-table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stats-table thead {
+            background: linear-gradient(135deg, #636e72, #2d3436);
+            color: white;
+        }
+        
+        .stats-table th {
+            padding: 12px 8px;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            font-size: 0.9rem;
+        }
+        
+        .stats-table td {
+            padding: 12px 8px;
+            vertical-align: middle;
+            border: 1px solid #e9ecef;
+        }
+        
+        .player-name {
+            font-weight: 600;
+            color: #2d3436;
+            min-width: 150px;
+        }
+        
+        .form-control {
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #74b9ff;
+            box-shadow: 0 0 0 0.2rem rgba(116, 185, 255, 0.25);
+        }
+        
+        .puntos-local, .puntos-visitante {
+            background: linear-gradient(135deg, #ffeaa7, #fdcb6e);
+            font-weight: bold;
+            color: #2d3436;
+        }
+        
+        .puntos-local:focus, .puntos-visitante:focus {
+            background: #ffeaa7;
+            border-color: #fdcb6e;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-success-custom {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+        
+        .btn-success-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+        }
+        
+        .btn-danger-custom {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+        }
+        
+        .btn-danger-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(253, 121, 168, 0.4);
+        }
+        
+        .stat-icon {
+            margin-right: 5px;
+            opacity: 0.7;
+        }
+        
+        .media (max-width: 768px) {
+            .main-container {
+                margin: 10px;
+                border-radius: 15px;
+                padding: 20px;
+            }
+            
+            .stats-table {
+                font-size: 0.8rem;
+            }
+            
+            .form-control {
+                padding: 6px 8px;
+            }
+            
+            .score-number {
+                font-size: 2rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-custom {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+        
+        .table-responsive {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid py-4">
+        <div class="main-container">
+            <div class="header-card">
+                <h2 class="mb-0">
+                    <i class="fas fa-basketball-ball me-2"></i>
+                    @Model.EquipoLocalNombre <span class="vs-badge">VS</span> @Model.EquipoVisitanteNombre
+                </h2>
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="score-number" id="puntosLocalTotal">0</div>
+                        <div>@Model.EquipoLocalNombre</div>
+                    </div>
+                    <div class="score-item">
+                        <i class="fas fa-trophy" style="font-size: 2rem; opacity: 0.7;"></i>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-number" id="puntosVisitanteTotal">0</div>
+                        <div>@Model.EquipoVisitanteNombre</div>
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="JugarPartido" method="post">
+                <input type="hidden" asp-for="PartidoId" />
+
+                <!-- Estadísticas equipo local -->
+                <div class="team-section">
+                    <div class="team-header">
+                        <i class="fas fa-home me-2"></i>
+                        Estadísticas @Model.EquipoLocalNombre
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Jugador</th>
+                                    <th><i class="fas fa-clock stat-icon"></i>Min</th>
+                                    <th><i class="fas fa-basketball-ball stat-icon"></i>Pts</th>
+                                    <th><i class="fas fa-arrows-alt stat-icon"></i>Reb</th>
+                                    <th><i class="fas fa-hand-paper stat-icon"></i>Ast</th>
+                                    <th><i class="fas fa-hand-rock stat-icon"></i>Rob</th>
+                                    <th><i class="fas fa-shield-alt stat-icon"></i>Blk</th>
+                                    <th><i class="fas fa-times stat-icon"></i>Perd</th>
+                                    <th><i class="fas fa-exclamation-triangle stat-icon"></i>Faltas</th>
+                                </tr>
+                            </thead>
+                            <tbody class="equipo-local">
+                                @for (int i = 0; i < Model.JugadoresLocal.Count; i++)
+                                {
+                                    <tr>
+                                        <td class="player-name">
+                                            @Model.JugadoresLocal[i].NombreCompleto
+                                            <input type="hidden" asp-for="JugadoresLocal[i].JugadorId" />
+                                        </td>
+                                        <td><input asp-for="JugadoresLocal[i].MinutosJugados" class="form-control" type="number" min="0" max="48" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Puntos" class="form-control puntos-local" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Rebotes" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Asistencias" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Robos" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Bloqueos" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Perdidas" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresLocal[i].Faltas" class="form-control" type="number" min="0" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Estadísticas equipo visitante -->
+                <div class="team-section">
+                    <div class="team-header visitante">
+                        <i class="fas fa-plane me-2"></i>
+                        Estadísticas @Model.EquipoVisitanteNombre
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table stats-table">
+                            <thead>
+                                <tr>
+                                    <th>Jugador</th>
+                                    <th><i class="fas fa-clock stat-icon"></i>Min</th>
+                                    <th><i class="fas fa-basketball-ball stat-icon"></i>Pts</th>
+                                    <th><i class="fas fa-arrows-alt stat-icon"></i>Reb</th>
+                                    <th><i class="fas fa-hand-paper stat-icon"></i>Ast</th>
+                                    <th><i class="fas fa-hand-rock stat-icon"></i>Rob</th>
+                                    <th><i class="fas fa-shield-alt stat-icon"></i>Blk</th>
+                                    <th><i class="fas fa-times stat-icon"></i>Perd</th>
+                                    <th><i class="fas fa-exclamation-triangle stat-icon"></i>Faltas</th>
+                                </tr>
+                            </thead>
+                            <tbody class="equipo-visitante">
+                                @for (int i = 0; i < Model.JugadoresVisitante.Count; i++)
+                                {
+                                    <tr>
+                                        <td class="player-name">
+                                            @Model.JugadoresVisitante[i].NombreCompleto
+                                            <input type="hidden" asp-for="JugadoresVisitante[i].JugadorId" />
+                                        </td>
+                                        <td><input asp-for="JugadoresVisitante[i].MinutosJugados" class="form-control" type="number" min="0" max="48" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Puntos" class="form-control puntos-visitante" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Rebotes" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Asistencias" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Robos" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Bloqueos" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Perdidas" class="form-control" type="number" min="0" /></td>
+                                        <td><input asp-for="JugadoresVisitante[i].Faltas" class="form-control" type="number" min="0" /></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <input type="hidden" name="estado" value="Finalizado" />
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-custom btn-success-custom">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Finalizar Partido
+                    </button>
+                    <button type="submit" name="cancelar" value="true" class="btn btn-custom btn-danger-custom" id="btnCancelar">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Cancelar Partido
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Función para calcular totales automáticamente
+        function calcularTotales() {
+            // Calcular puntos equipo local
+            let totalLocal = 0;
+            document.querySelectorAll('.puntos-local').forEach(input => {
+                totalLocal += parseInt(input.value) || 0;
+            });
+            document.getElementById('puntosLocalTotal').textContent = totalLocal;
+
+            // Calcular puntos equipo visitante
+            let totalVisitante = 0;
+            document.querySelectorAll('.puntos-visitante').forEach(input => {
+                totalVisitante += parseInt(input.value) || 0;
+            });
+            document.getElementById('puntosVisitanteTotal').textContent = totalVisitante;
+        }
+
+        // Agregar event listeners para actualizar totales
+        document.addEventListener('DOMContentLoaded', function() {
+            // Agregar listeners a todos los inputs de puntos
+            document.querySelectorAll('.puntos-local, .puntos-visitante').forEach(input => {
+                input.addEventListener('input', calcularTotales);
+            });
+
+            // Validación de minutos (no puede exceder 48)
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.max && parseInt(this.value) > parseInt(this.max)) {
+                        this.value = this.max;
+                    }
+                    if (parseInt(this.value) < 0) {
+                        this.value = 0;
+                    }
+                });
+            });
+
+            // Confirmación para cancelar partido
+            document.getElementById('btnCancelar') && document.getElementById('btnCancelar').addEventListener('click', function(e) {
+                if (!confirm('¿Estás seguro de que quieres cancelar el partido? Se perderán todos los datos ingresados.')) {
+                    e.preventDefault();
+                }
+            });
+
+            // Efectos visuales para inputs focus
+            document.querySelectorAll('.form-control').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
+@section Scripts {
+    <script>
+        function calcularPuntos(selector, resultadoId) {
+            const inputs = document.querySelectorAll(selector);
+            let total = 0;
+            inputs.forEach(input => {
+                total += parseInt(input.value) || 0;
+            });
+            document.getElementById(resultadoId).textContent = total;
+        }
+
+        function getValor(fila, nombreCampo) {
+            const input = fila.querySelector(`input[name*='${nombreCampo}']`);
+            return input ? parseInt(input.value) || 0 : 0;
+        }
+
+        function validarFormulario(e) {
+
+            if (document.activeElement && document.activeElement.id === "btnCancelar") {
+                return;
+            }
+
+            let errores = [];
+            let totalMinutosLocal = 0, totalMinutosVisitante = 0;
+            let totalPuntosLocal = 0, totalPuntosVisitante = 0;
+            const filas = document.querySelectorAll("tbody tr");
+
+            filas.forEach((fila, idx) => {
+                const nombre = fila.querySelector("td").innerText.trim();
+
+                const minutos = getValor(fila, 'MinutosJugados');
+                const puntos = getValor(fila, 'Puntos');
+                const rebotes = getValor(fila, 'Rebotes');
+                const asistencias = getValor(fila, 'Asistencias');
+                const robos = getValor(fila, 'Robos');
+                const bloqueos = getValor(fila, 'Bloqueos');
+                const perdidas = getValor(fila, 'Perdidas');
+                const faltas = getValor(fila, 'Faltas');
+
+                const equipo = idx < @Model.JugadoresLocal.Count ? 'local' : 'visitante';
+
+                if ([minutos, puntos, rebotes, asistencias, robos, bloqueos, perdidas, faltas].some(x => x < 0)) {
+                    errores.push(`❌ ${nombre}: Ningún valor puede ser negativo.`);
+                }
+                if (minutos > 48) errores.push(`❌ ${nombre}: No puede jugar más de 48 minutos.`);
+                if (puntos > 40) errores.push(`❌ ${nombre}: Máximo 40 puntos.`);
+                if (rebotes > 30) errores.push(`❌ ${nombre}: Rebotes máximos: 30.`);
+                if (asistencias > 20) errores.push(`❌ ${nombre}: Máximo 20 asistencias.`);
+                if (robos > 10) errores.push(`❌ ${nombre}: Máximo 10 robos.`);
+                if (bloqueos > 10) errores.push(`❌ ${nombre}: Máximo 10 bloqueos.`);
+                if (perdidas > 15) errores.push(`❌ ${nombre}: Máximo 15 pérdidas.`);
+                if (faltas > 10) errores.push(`❌ ${nombre}: Máximo 10 faltas.`);
+
+                const tieneStats = puntos > 0 || rebotes > 0 || asistencias > 0 || robos > 0 || bloqueos > 0 || perdidas > 0;
+                if (minutos === 0 && tieneStats)
+                    errores.push(`❌ ${nombre}: Con 0 minutos solo puede tener faltas.`);
+
+                if (equipo === 'local') {
+                    totalMinutosLocal += minutos;
+                    totalPuntosLocal += puntos;
+                } else {
+                    totalMinutosVisitante += minutos;
+                    totalPuntosVisitante += puntos;
+                }
+            });
+
+            if (totalPuntosLocal === totalPuntosVisitante) {
+                errores.push("❌ No se permite empate. Uno de los equipos debe ganar.");
+            }
+            if (totalPuntosLocal < 2 || totalPuntosLocal > 150)
+                errores.push(`❌ El equipo local debe tener entre 2 y 150 puntos.`);
+            if (totalPuntosVisitante < 2 || totalPuntosVisitante > 150)
+                errores.push(`❌ El equipo visitante debe tener entre 2 y 150 puntos.`);
+            if (totalMinutosLocal !== 240)
+                errores.push(`❌ El equipo local debe sumar 300 minutos (actual: ${totalMinutosLocal}).`);
+            if (totalMinutosVisitante !== 240)
+                errores.push(`❌ El equipo visitante debe sumar 300 minutos (actual: ${totalMinutosVisitante}).`);
+
+            if (errores.length > 0) {
+                e.preventDefault();
+                alert(errores.join("\n"));
+            }
+        }
+
+        document.querySelector("form").addEventListener("submit", validarFormulario);
+
+        document.querySelectorAll('.puntos-local, .puntos-visitante').forEach(input => {
+            input.addEventListener('input', () => {
+                calcularPuntos('.puntos-local', 'puntosLocalTotal');
+                calcularPuntos('.puntos-visitante', 'puntosVisitanteTotal');
+            });
+        });
+
+        window.onload = () => {
+            calcularPuntos('.puntos-local', 'puntosLocalTotal');
+            calcularPuntos('.puntos-visitante', 'puntosVisitanteTotal');
+        }
+    </script>
+}

@@ -1,0 +1,49 @@
+﻿
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Detalles del Equipo";
+}
+
+<div class="card shadow mt-4">
+    <div class="card-header bg-secondary text-white">
+        <h3 class="mb-0"><i class="fa fa-info-circle"></i> Detalles del Equipo</h3>
+    </div>
+    <div class="card-body">
+        <div class="text-center mb-4">
+            @if (!string.IsNullOrEmpty(Model.img))
+            {
+                <img src="~/images/equipos/@Model.img" alt="@Model.nombre" class="img-thumbnail" style="max-width:200px; border-radius:10px;" />
+            }
+            else
+            {
+                <span class="text-muted">No hay imagen disponible.</span>
+            }
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-3">ID:</dt>
+            <dd class="col-sm-9">@Model.id</dd>
+
+            <dt class="col-sm-3">Nombre:</dt>
+            <dd class="col-sm-9">@Model.nombre</dd>
+
+            <dt class="col-sm-3">Sede:</dt>
+            <dd class="col-sm-9">@Model.sede</dd>
+            
+            <dt class="col-sm-3">Estado:</dt>
+            <dd class="col-sm-9">@Model.estado</dd>
+
+
+        </dl>
+
+        <div class="mt-4">
+            <a asp-action="Edit" asp-route-id="@Model.id" class="btn btn-primary">
+                <i class="fa fa-edit"></i> Editar
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fa fa-arrow-left"></i> Volver a la Lista
+            </a>
+        </div>
+    </div>
+</div>

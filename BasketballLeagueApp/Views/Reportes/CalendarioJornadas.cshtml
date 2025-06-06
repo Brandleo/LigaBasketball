@@ -1,0 +1,72 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteCalendarioJornadaVM
+@{
+    ViewData["Title"] = "Calendario Jornadas";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Calendario de Jornadas</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="CalendarioJornadas" method="post">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label">Seleccionar Temporada</label>
+                        <select asp-for="TemporadaSeleccionada" asp-items="Model.Temporadas" class="form-select">
+                            <option value="">Seleccione una temporada</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <button type="submit" class="btn btn-primary">Ver Calendario</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Jornadas != null && Model.Jornadas.Any())
+    {
+        <div class="mt-4">
+            @foreach (var jornada in Model.Jornadas)
+            {
+                <div class="card mb-4 border-secondary shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <strong>Jornada @jornada.NumeroJornada</strong> |
+                        <span>@jornada.FechaInicio.ToString("dd/MM/yyyy") - @jornada.FechaFin.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="card-body">
+                        @if (jornada.Partidos.Any())
+                        {
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Partido</th>
+                                        <th>Fecha</th>
+                                        <th>Hora</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var partido in jornada.Partidos)
+                                    {
+                                        <tr>
+                                            <td>@partido.Equipos</td>
+                                            <td>@partido.Fecha.ToString("dd/MM/yyyy")</td>
+                                            @* <td>@partido.Hora.ToString("hh\\:mm")</td>  Si es TimeSpan *@
+                                             <td>@partido.Hora.ToString("HH:mm")</td> @* Si es TimeOnly *@
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No hay partidos programados para esta jornada.</p>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    }

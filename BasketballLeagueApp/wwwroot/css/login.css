@@ -1,0 +1,124 @@
+﻿/* Fondo con imagen en vez de degradado */
+body {
+    background: url('/images/backgroundLogin.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/* Contenedor centrado */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Caja con Glassmorphism */
+.login-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 40px;
+    width: 350px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+    /* Estilos de los textos */
+    .login-box h2 {
+        color: white;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* Campos de entrada con efecto glass */
+    .login-box input {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        border-radius: 10px
+    }
+
+        .login-box input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        /* Evitar que el input cambie de color al hacer clic */
+        .login-box input:focus {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: white;
+            outline: none;
+            border: none;
+            box-shadow: none;
+        }
+/* Posiciona el botón dentro del input */
+.position-relative {
+    position: relative;
+}
+
+.btn-toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7); /* Color del ojo */
+    font-size: 18px;
+    outline: none; /* Elimina el borde */
+    box-shadow: none; /* Evita resplandores */
+    transition: none; /* Evita animaciones al hacer clic */
+}
+
+    /* Cambia de color al pasar el mouse */
+    .btn-toggle-password:hover {
+        color: rgba(255, 255, 255, 1);
+    }
+
+    .btn-toggle-password:focus,
+    .btn-toggle-password:active {
+        outline: none !important;
+        box-shadow: none !important;
+        background: transparent !important;
+        border: none !important;
+        transition: none !important;
+    }
+
+/* Botón de login */
+.btn-login {
+    background: white;
+    color: #333;
+    font-weight: bold;
+    transition: 0.3s;
+    border-radius: 20px
+}
+
+    .btn-login:hover {
+        background: #ddd;
+    }
+
+/* Links de recuperar contraseña y registrarse */
+.forgot-password, .register {
+    text-align: center;
+    color: white;
+    margin-top: 10px;
+}
+
+    .forgot-password a, .register a {
+        color: white;
+        text-decoration: underline;
+    }
+
+/* Animación de flotación para darle vida al diseño */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(10px);
+    }
+}
+
+.login-box {
+    animation: float 3s ease-in-out infinite;
+}

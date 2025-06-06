@@ -1,0 +1,551 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+
+@{
+    ViewData["Title"] = "Dashboard de Estadísticas";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4"><i class="bi bi-graph-up"></i> Dashboard de Estadísticas</h2>
+
+    <!-- Comparación de Equipos -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Comparación de Equipos</h5>
+        </div>
+        <div class="card-body">
+            <form id="form-comparacion-equipos" class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Estadística</label>
+                    <select id="estadistica-comparacion" class="form-select">
+                        <option value="puntos">Puntos</option>
+                        <option value="rebotes">Rebotes</option>
+                        <option value="asistencias">Asistencias</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Temporada</label>
+                    <select id="temporada-comparacion" class="form-select"></select>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-primary">Actualizar</button>
+                </div>
+            </form>
+            <canvas id="grafico-comparacion-equipos" height="120"></canvas>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <!-- Distribución de Puntos -->
+        <div class="col-md-6 mb-4">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Distribución de Puntos por Jugador</h5>
+            </div>
+            <div class="card-body">
+                <form id="form-distribucion-puntos" class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Temporada</label>
+                        <select id="temporada-distribucion" class="form-select"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Equipo</label>
+                        <select id="equipo-distribucion" class="form-select"></select>
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+                <canvas id="grafico-distribucion-puntos" height="120"></canvas>
+            </div>
+        </div>
+        </div>
+
+        <!-- Resultados por Jornada -->
+        <div class="col-md-6 mb-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Resultados por Jornada</h5>
+                </div>
+                <div class="card-body">
+                    <form id="form-resultados-jornada" class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Temporada</label>
+                            <select id="temporada-resultados" class="form-select"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Equipo</label>
+                            <select id="equipo-resultados" class="form-select"></select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Actualizar</button>
+                        </div>
+                    </form>
+                    <canvas id="grafico-resultados-jornada" height="120"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Rendimiento del Jugador -->
+        <div class="col-md-6 mb-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Rendimiento del Jugador</h5>
+                </div>
+                <div class="card-body">
+                    <form id="form-rendimiento-jugador" class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Temporada</label>
+                            <select id="temporada-rendimiento" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Equipo</label>
+                            <select id="equipo-rendimiento" class="form-select"></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Jugador</label>
+                            <select id="jugador-rendimiento" class="form-select"></select>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-primary">Mostrar</button>
+                        </div>
+                    </form>
+                    <canvas id="grafico-rendimiento-jugador" height="120"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Clasificación de Equipos -->
+        <div class="col-md-6 mb-4">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Clasificación de Equipos</h5>
+                </div>
+                <div class="card-body">
+                    <form id="form-clasificacion" class="row g-2 mb-3">
+                        <div class="col-md-9">
+                            <label class="form-label">Temporada</label>
+                            <select id="temporada-clasificacion" class="form-select"></select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-success w-100">Mostrar</button>
+                        </div>
+                    </form>
+                    <canvas id="grafico-clasificacion" height="300"></canvas>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let chartComparacionEquipos;
+
+        async function cargarTemporadasComparacion() {
+            const res = await fetch('/Graficos/ObtenerTemporadas');
+            const data = await res.json();
+            const select = document.getElementById('temporada-comparacion');
+            select.innerHTML = '';
+            data.forEach(t => {
+                select.innerHTML += `<option value="${t.value}">${t.text}</option>`;
+            });
+        }
+
+        async function cargarGraficoComparacionEquipos() {
+            const estadistica = document.getElementById("estadistica-comparacion").value;
+            const temporada = document.getElementById("temporada-comparacion").value;
+
+            const res = await fetch(`/Graficos/ObtenerDatosComparacion?temporadaId=${temporada}&estadistica=${estadistica}`, {
+                method: 'POST'
+            });
+
+            const data = await res.json();
+            const ctx = document.getElementById("grafico-comparacion-equipos").getContext("2d");
+
+            if (chartComparacionEquipos) chartComparacionEquipos.destroy();
+
+            chartComparacionEquipos = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: estadistica.toUpperCase(),
+                        data: data.datos,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Comparación de Equipos - ${estadistica.toUpperCase()}`
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("form-comparacion-equipos").addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGraficoComparacionEquipos();
+        });
+
+        window.addEventListener("load", async () => {
+            await cargarTemporadasComparacion();
+            cargarGraficoComparacionEquipos();
+        });
+    </script>
+
+    <script>
+        let chartDistribucion;
+
+        async function cargarTemporadasDistribucion() {
+            const res = await fetch('/Graficos/ObtenerTemporadas');
+            const data = await res.json();
+            const selectTemporada = document.getElementById("temporada-distribucion");
+            selectTemporada.innerHTML = '';
+            data.forEach(t => {
+                selectTemporada.innerHTML += `<option value="${t.value}">${t.text}</option>`;
+            });
+
+            if (data.length > 0) {
+                await cargarEquiposDistribucion(data[0].value);
+            }
+        }
+
+        async function cargarEquiposDistribucion(temporadaId) {
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await res.json();
+            const selectEquipo = document.getElementById("equipo-distribucion");
+            selectEquipo.innerHTML = '';
+            data.forEach(e => {
+                selectEquipo.innerHTML += `<option value="${e.value}">${e.text}</option>`;
+            });
+        }
+
+        async function cargarGraficoDistribucion() {
+            const temporada = document.getElementById("temporada-distribucion").value;
+            const equipo = document.getElementById("equipo-distribucion").value;
+
+            const res = await fetch(`/Graficos/ObtenerDistribucionPuntos?temporadaId=${temporada}&equipoId=${equipo}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            const ctx = document.getElementById("grafico-distribucion-puntos").getContext("2d");
+
+            if (chartDistribucion) chartDistribucion.destroy();
+
+            chartDistribucion = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos',
+                        data: data.datos,
+                        backgroundColor: data.etiquetas.map(() =>
+                            `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`
+                        )
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución de Puntos por Jugador'
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("form-distribucion-puntos").addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGraficoDistribucion();
+        });
+
+        document.getElementById("temporada-distribucion").addEventListener("change", function () {
+            cargarEquiposDistribucion(this.value);
+        });
+
+        window.addEventListener("load", async () => {
+            await cargarTemporadasDistribucion();
+            cargarGraficoDistribucion();
+        });
+    </script>
+
+    <script>
+        let chartResultadosJornada;
+
+        async function cargarTemporadasResultados() {
+            const res = await fetch('/Graficos/ObtenerTemporadas');
+            const data = await res.json();
+            const selectTemporada = document.getElementById("temporada-resultados");
+            selectTemporada.innerHTML = '';
+            data.forEach(t => {
+                selectTemporada.innerHTML += `<option value="${t.value}">${t.text}</option>`;
+            });
+
+            if (data.length > 0) {
+                await cargarEquiposResultados(data[0].value);
+            }
+        }
+
+        async function cargarEquiposResultados(temporadaId) {
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await res.json();
+            const selectEquipo = document.getElementById("equipo-resultados");
+            selectEquipo.innerHTML = '';
+            data.forEach(e => {
+                selectEquipo.innerHTML += `<option value="${e.value}">${e.text}</option>`;
+            });
+        }
+
+        async function cargarGraficoResultados() {
+            const temporada = document.getElementById("temporada-resultados").value;
+            const equipo = document.getElementById("equipo-resultados").value;
+
+            const res = await fetch(`/Graficos/ObtenerResultadosPorJornada?temporadaId=${temporada}&equipoId=${equipo}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            const ctx = document.getElementById("grafico-resultados-jornada").getContext("2d");
+
+            if (chartResultadosJornada) chartResultadosJornada.destroy();
+
+            chartResultadosJornada = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos por jornada',
+                        data: data.datos,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Evolución de Puntos por Jornada'
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("form-resultados-jornada").addEventListener("submit", function (e) {
+            e.preventDefault();
+            cargarGraficoResultados();
+        });
+
+        document.getElementById("temporada-resultados").addEventListener("change", function () {
+            cargarEquiposResultados(this.value);
+        });
+
+        window.addEventListener("load", async () => {
+            await cargarTemporadasResultados();
+            cargarGraficoResultados();
+        });
+    </script>
+
+
+
+
+
+    <script>
+        let chartRendimiento;
+
+        async function cargarTemporadasRendimiento() {
+            const res = await fetch('/Graficos/ObtenerTemporadas');
+            const data = await res.json();
+            const temporadaSelect = document.getElementById("temporada-rendimiento");
+            temporadaSelect.innerHTML = '';
+            data.forEach(item => {
+                temporadaSelect.innerHTML += `<option value="${item.value}">${item.text}</option>`;
+            });
+            if (data.length > 0) await cargarEquiposRendimiento(data[0].value);
+        }
+
+        async function cargarEquiposRendimiento(temporadaId) {
+            const res = await fetch(`/Graficos/ObtenerEquiposPorTemporada?temporadaId=${temporadaId}`);
+            const data = await res.json();
+            const equipoSelect = document.getElementById("equipo-rendimiento");
+            equipoSelect.innerHTML = '';
+            data.forEach(item => {
+                equipoSelect.innerHTML += `<option value="${item.value}">${item.text}</option>`;
+            });
+            if (data.length > 0) await cargarJugadoresRendimiento(data[0].value);
+        }
+
+        async function cargarJugadoresRendimiento(equipoId) {
+            const res = await fetch(`/Graficos/ObtenerJugadoresPorEquipo?equipoId=${equipoId}`);
+            const data = await res.json();
+            const jugadorSelect = document.getElementById("jugador-rendimiento");
+            jugadorSelect.innerHTML = '';
+            data.forEach(item => {
+                jugadorSelect.innerHTML += `<option value="${item.value}">${item.text}</option>`;
+            });
+        }
+
+        document.getElementById("temporada-rendimiento").addEventListener("change", function () {
+            cargarEquiposRendimiento(this.value);
+        });
+
+        document.getElementById("equipo-rendimiento").addEventListener("change", function () {
+            cargarJugadoresRendimiento(this.value);
+        });
+
+        document.getElementById("form-rendimiento-jugador").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const temporada = document.getElementById("temporada-rendimiento").value;
+            const jugador = document.getElementById("jugador-rendimiento").value;
+
+            const res = await fetch(`/Graficos/ObtenerRendimientoJugador?temporadaId=${temporada}&jugadorId=${jugador}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            const ctx = document.getElementById("grafico-rendimiento-jugador").getContext("2d");
+
+            if (chartRendimiento) chartRendimiento.destroy();
+
+            chartRendimiento = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: "Estadísticas",
+                        data: data.datos,
+                        fill: true,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        pointBackgroundColor: 'rgba(54, 162, 235, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rendimiento del Jugador'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            suggestedMax: Math.max(...data.datos) + 5
+                        }
+                    }
+                }
+            });
+        });
+
+        window.addEventListener("load", async () => {
+            await cargarTemporadasRendimiento();
+        });
+    </script>
+
+    <script>
+        let chartClasificacion;
+
+        async function cargarTemporadasClasificacion() {
+            const res = await fetch('/Graficos/ObtenerTemporadas');
+            const data = await res.json();
+            const temporadaSelect = document.getElementById("temporada-clasificacion");
+            temporadaSelect.innerHTML = '';
+            data.forEach(item => {
+                temporadaSelect.innerHTML += `<option value="${item.value}">${item.text}</option>`;
+            });
+            if (data.length > 0) cargarGraficoClasificacion(data[0].value);
+        }
+
+        async function cargarGraficoClasificacion(temporadaId) {
+            const res = await fetch(`/Graficos/ObtenerClasificacionEquipos?temporadaId=${temporadaId}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            const ctx = document.getElementById("grafico-clasificacion").getContext("2d");
+
+            if (chartClasificacion) chartClasificacion.destroy();
+
+            chartClasificacion = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.etiquetas,
+                    datasets: [{
+                        label: 'Puntos Totales',
+                        data: data.datos,
+                        backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                        borderColor: 'rgba(40, 167, 69, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Puntos Totales por Equipo',
+                            font: {
+                                size: 18
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw} pts`;
+                                }
+                            }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById("form-clasificacion").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const temporada = document.getElementById("temporada-clasificacion").value;
+            cargarGraficoClasificacion(temporada);
+        });
+
+        window.addEventListener("load", async () => {
+            await cargarTemporadasClasificacion();
+        });
+    </script>
+
+    <script>
+        window.onload = async () => {
+            await cargarTemporadasComparacion();
+            await cargarTemporadasClasificacion();
+            document.getElementById("tempPastel").dispatchEvent(new Event("change"));
+            document.getElementById("tempLinea").dispatchEvent(new Event("change"));
+            document.getElementById("tempRadar").dispatchEvent(new Event("change"));
+        };
+    </script>
+
+
+}

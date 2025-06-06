@@ -1,0 +1,372 @@
+﻿@using BasketballLeagueApp.Models.ViewModels
+@model List<ClasificacionEquipoViewModel>
+@{
+    ViewData["Title"] = "Clasificación de Equipos";
+}
+
+<div class="container-fluid px-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">
+                <i class="fas fa-trophy text-warning me-2"></i>
+                @ViewData["Title"]
+            </h1>
+            <p class="text-muted mb-0">Estadísticas y clasificación de la liga</p>
+        </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-6">
+                    <label for="temporadaSelect" class="form-label fw-semibold">Temporada</label>
+                    <select name="temporadaId" id="temporadaSelect" class="form-select" onchange="this.form.submit()">
+                        <option value="">Seleccione una temporada</option>
+                        @foreach (var item in (SelectList)ViewBag.Temporadas)
+                        {
+                            if (item.Selected)
+                            {
+                                <option value="@item.Value" selected>@item.Text</option>
+                            }
+                            else
+                            {
+                                <option value="@item.Value">@item.Text</option>
+                            }
+                        }
+
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="ordenSelect" class="form-label fw-semibold">Ordenar por</label>
+                    <select name="orden" id="ordenSelect" class="form-select" onchange="this.form.submit()">
+                        <option value="porcentaje_desc">% de Victorias (Mayor a Menor)</option>
+                        <option value="porcentaje_asc">% de Victorias (Menor a Mayor)</option>
+                        <option value="ganados_desc">Juegos Ganados (Mayor a Menor)</option>
+                        <option value="ganados_asc">Juegos Ganados (Menor a Mayor)</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Any())
+    {
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Equipos
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Count()</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-users fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Líder
+                                </div>
+                                <div class="h6 mb-0 font-weight-bold text-gray-800">@Model.FirstOrDefault()?.EquipoNombre</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-crown fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Mejor %
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @(Model.FirstOrDefault()?.PorcentajeVictorias?.ToString("0.0"))%
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-percentage fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Más Ganados
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    @Model.Max(x => x.JuegosGanados)
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-trophy fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Table -->
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-table me-2"></i>
+                    Tabla de Clasificación
+                </h6>
+                <div class="dropdown no-arrow">
+                    <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in" aria-labelledby="dropdownMenuLink">
+                        <div class="dropdown-header">Exportar:</div>
+                        <a class="dropdown-item" href="#"><i class="fas fa-file-excel fa-sm fa-fw mr-2 text-gray-400"></i> Excel</a>
+                        <a class="dropdown-item" href="#"><i class="fas fa-file-pdf fa-sm fa-fw mr-2 text-gray-400"></i> PDF</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th scope="col" class="text-center">#</th>
+                                <th scope="col">
+                                    <i class="fas fa-shield-alt me-2"></i>Equipo
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-trophy me-1 text-success"></i>G
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-times me-1 text-danger"></i>P
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-percentage me-1"></i>% Vict.
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-chart-line me-1"></i>DIF
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-home me-1"></i>Local
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-plane me-1"></i>Visit.
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-history me-1"></i>Últ. 10
+                                </th>
+                                <th scope="col" class="text-center">
+                                    <i class="fas fa-fire me-1"></i>Racha
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var posicion = 1;
+                            }
+                            @foreach (var equipo in Model)
+                            {
+                                <tr class="@(posicion <= 3 ? "table-success" : posicion >= Model.Count() - 2 ? "table-danger" : "")">
+                                    <td class="text-center fw-bold">
+                                        @if (posicion == 1)
+                                        {
+                                            <i class="fas fa-crown text-warning"></i>
+                                        }
+                                        else if (posicion <= 3)
+                                        {
+                                            <i class="fas fa-medal text-success"></i>
+                                        }
+                                        else
+                                        {
+                                            @posicion
+                                        }
+                                    </td>
+                                    <td class="fw-semibold">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-title rounded-circle bg-primary text-white">
+                                                    @equipo.EquipoNombre.Substring(0, Math.Min(2, equipo.EquipoNombre.Length)).ToUpper()
+                                                </div>
+                                            </div>
+                                            @equipo.EquipoNombre
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success">@equipo.JuegosGanados</span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-danger">@equipo.JuegosPerdidos</span>
+                                    </td>
+                                    <td class="text-center fw-bold">
+                                        @{
+                                            var porcentaje = equipo.PorcentajeVictorias ?? 0;
+                                            var colorClass = porcentaje >= 60 ? "text-success" : porcentaje >= 40 ? "text-warning" : "text-danger";
+                                        }
+                                        <span class="@colorClass">@porcentaje.ToString("0.0")%</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @if (equipo.DiferenciaConLider == 0)
+                                        {
+                                            <span class="badge bg-primary">-</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">@equipo.DiferenciaConLider</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="text-muted">
+                                            <span class="text-success">@equipo.LocalGanados</span>-<span class="text-danger">@equipo.LocalPerdidos</span>
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="text-muted">
+                                            <span class="text-success">@equipo.VisitanteGanados</span>-<span class="text-danger">@equipo.VisitantePerdidos</span>
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        <small class="text-muted">
+                                            <span class="text-success">@equipo.Ultimos10Ganados</span>-<span class="text-danger">@equipo.Ultimos10Perdidos</span>
+                                        </small>
+                                    </td>
+                                    <td class="text-center">
+                                        @{
+                                            var rachaClass = equipo.Racha?.StartsWith("G") == true ? "text-success" : "text-danger";
+                                        }
+                                        <span class="fw-bold @rachaClass">@equipo.Racha</span>
+                                    </td>
+                                </tr>
+                                posicion++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body py-2">
+                        <div class="d-flex flex-wrap justify-content-center gap-4">
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-success me-2">&nbsp;</div>
+                                <small class="text-muted">Playoffs</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="badge bg-danger me-2">&nbsp;</div>
+                                <small class="text-muted">Zona de Descenso</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-crown text-warning me-2"></i>
+                                <small class="text-muted">Líder</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-medal text-success me-2"></i>
+                                <small class="text-muted">Top 3</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="card shadow">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-basketball-ball fa-3x text-muted"></i>
+                </div>
+                <h5 class="text-muted mb-3">No hay datos disponibles</h5>
+                <p class="text-muted mb-4">
+                    No se encontraron equipos para la temporada seleccionada.<br>
+                    Por favor, seleccione una temporada diferente.
+                </p>
+                <button class="btn btn-primary" onclick="document.getElementById('temporadaSelect').focus()">
+                    <i class="fas fa-search me-2"></i>
+                    Seleccionar Temporada
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Custom CSS -->
+<style>
+    .border-left-primary {
+        border-left: 0.25rem solid #4e73df !important;
+    }
+    .border-left-success {
+        border-left: 0.25rem solid #1cc88a !important;
+    }
+    .border-left-info {
+        border-left: 0.25rem solid #36b9cc !important;
+    }
+    .border-left-warning {
+        border-left: 0.25rem solid #f6c23e !important;
+    }
+    .avatar-sm {
+        height: 2rem;
+        width: 2rem;
+    }
+    .avatar-title {
+        align-items: center;
+        background-color: #6c757d;
+        color: #fff;
+        display: flex;
+        font-size: 0.875rem;
+        font-weight: 600;
+        height: 100%;
+        justify-content: center;
+        width: 100%;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+    .card {
+        border: none;
+        border-radius: 0.35rem;
+    }
+    .card-header {
+        background-color: #f8f9fc;
+        border-bottom: 1px solid #e3e6f0;
+    }
+    .text-gray-800 {
+        color: #5a5c69 !important;
+    }
+    .text-gray-300 {
+        color: #dddfeb !important;
+    }
+    .text-gray-400 {
+        color: #858796 !important;
+    }
+</style>

@@ -1,0 +1,505 @@
+﻿@model List<BasketballLeagueApp.Models.partidos>
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+
+
+
+<style>
+    .matches-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .matches-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+    
+    .matches-header::after {
+        content: '🏀';
+        position: absolute;
+        top: 1rem;
+        right: 2rem;
+        font-size: 4rem;
+        opacity: 0.2;
+    }
+    
+    .jornada-number {
+        display: inline-block;
+        background: rgba(255,255,255,0.2);
+        padding: 0.5rem 1.5rem;
+        border-radius: 25px;
+        font-weight: bold;
+        margin-left: 1rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .matches-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        overflow: hidden;
+        border: 1px solid #f0f0f0;
+    }
+    
+    .match-card {
+        background: white;
+        border: none;
+        border-bottom: 1px solid #f8f9fa;
+        transition: all 0.3s ease;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .match-card:hover {
+        background: linear-gradient(45deg, #f8f9ff, #ffffff);
+        transform: translateX(5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .match-card:last-child {
+        border-bottom: none;
+    }
+    
+    .team-section {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .team-badge {
+        background: linear-gradient(45deg, #667eea, #764ba2);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 1rem;
+        margin-right: 1rem;
+        min-width: 200px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+    }
+    
+    .team-badge.visitante {
+        background: linear-gradient(45deg, #48CAE4, #0077B6);
+        box-shadow: 0 3px 10px rgba(72, 202, 228, 0.3);
+    }
+    
+    .vs-separator {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #6c757d;
+        margin: 0 1rem;
+    }
+    
+    .match-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1rem;
+    }
+    
+    .info-badge {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .date-badge {
+        background: #e3f2fd;
+        color: #1976d2;
+        border: 1px solid #bbdefb;
+    }
+    
+    .time-badge {
+        background: #f3e5f5;
+        color: #7b1fa2;
+        border: 1px solid #ce93d8;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+    }
+    
+    .status-programado {
+        background: linear-gradient(45deg, #81c784, #4caf50);
+        color: white;
+        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+    
+    .status-finalizado {
+        background: linear-gradient(45deg, #90a4ae, #607d8b);
+        color: white;
+        box-shadow: 0 2px 8px rgba(96, 125, 139, 0.3);
+    }
+    
+    .status-cancelado {
+        background: linear-gradient(45deg, #e57373, #f44336);
+        color: white;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+    }
+    
+    .status-en-curso {
+        background: linear-gradient(45deg, #ffb74d, #ff9800);
+        color: white;
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+        animation: pulse 2s infinite;
+    }
+    
+   
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        justify-content: flex-end;
+    }
+    
+    .btn-play {
+        background: linear-gradient(45deg, #2ed573, #1dd1a1);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-play:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(46, 213, 115, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-edit {
+        background: linear-gradient(45deg, #ffa726, #fb8c00);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 167, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-disabled {
+        background: linear-gradient(45deg, #bdbdbd, #9e9e9e);
+        border: none;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        font-weight: 600;
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+    
+    .playoff-indicator {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .no-matches {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(45deg, #f8f9ff, #ffffff);
+        border-radius: 15px;
+        color: #6c757d;
+    }
+    
+    .no-matches-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .media (max-width: 768px) {
+        .team-section {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .team-badge {
+            margin-right: 0;
+            margin-bottom: 0.5rem;
+            min-width: auto;
+        }
+        
+        .vs-separator {
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+        
+        .action-buttons {
+            justify-content: center;
+        }
+        
+        .match-info {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <!-- Header de Partidos -->
+    <div class="matches-header fade-in-up">
+        <div class="row align-items-center">
+            <div class="col-12">
+                <h1 class="mb-2">
+                    <i class="fas fa-calendar-day me-3"></i>
+                    Partidos de la Jornada
+                    <span class="jornada-number">@ViewBag.Jornada.numero_jornada</span>
+                </h1>
+                <p class="mb-0 opacity-75">
+                    Gestiona y supervisa todos los encuentros programados
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+    @@keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @@keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    @@keyframes ripple-animation {
+        to { transform: scale(4); opacity: 0; }
+    }
+</style>
+
+    <!-- Contenedor de Partidos -->
+    @if (Model != null && Model.Any())
+    {
+        <div class="matches-container fade-in-up">
+            @foreach (var partido in Model)
+            {
+                <div class="match-card">
+                    @if (partido.es_playoff)
+                    {
+                        <div class="playoff-indicator">
+                            <i class="fas fa-trophy me-1"></i>Playoff
+                        </div>
+                    }
+                    
+                    <!-- Equipos -->
+                    <div class="team-section">
+                        <div class="team-badge">
+                            <i class="fas fa-home me-2"></i>@partido.equipo_local.nombre
+                        </div>
+                        <div class="vs-separator">VS</div>
+                        <div class="team-badge visitante">
+                            <i class="fas fa-plane me-2"></i>@partido.equipo_visitante.nombre
+                        </div>
+                    </div>
+                    
+                    <!-- Información del Partido -->
+                    <div class="match-info">
+                        <div class="info-badge date-badge">
+                            <i class="fas fa-calendar me-2"></i>
+                            @partido.fecha.ToShortDateString()
+                        </div>
+                        <div class="info-badge time-badge">
+                            <i class="fas fa-clock me-2"></i>
+                            @partido.hora
+                        </div>
+                        <div class="status-badge @(
+                            partido.estado == "Programado" ? "status-programado" :
+                            partido.estado == "Finalizado" ? "status-finalizado" :
+                            partido.estado == "Cancelado" ? "status-cancelado" :
+                            partido.estado == "En Curso" ? "status-en-curso" : ""
+                        )">
+                            @if (partido.estado == "Programado")
+                            {
+                                <i class="fas fa-clock me-1"></i>
+                            }
+                            else if (partido.estado == "Finalizado")
+                            {
+                                <i class="fas fa-check-circle me-1"></i>
+                            }
+                            else if (partido.estado == "Cancelado")
+                            {
+                                <i class="fas fa-times-circle me-1"></i>
+                            }
+                            else if (partido.estado == "En Curso")
+                            {
+                                <i class="fas fa-play-circle me-1"></i>
+                            }
+                            @partido.estado
+                        </div>
+
+                        @if (partido.estado == "Finalizado" && partido.ganador_id != null)
+                        {
+                            <div class="info-badge status-badge bg-dark text-white">
+                                🏆 Ganador:
+                                @{
+                                    string ganador = partido.ganador_id == partido.equipo_local_id
+                                    ? partido.equipo_local.nombre
+                                    : partido.equipo_visitante.nombre;
+                                }
+                                <span class="fw-bold ms-2">@ganador</span>
+                            </div>
+                        }
+
+                    </div>
+                    
+                    <!-- Botones de Acción -->
+                    <div class="action-buttons">
+                        @if (partido.estado != "Finalizado" && partido.estado != "Cancelado")
+                        {
+                            var seriesFinalizadas = ViewBag.SeriesFinalizadas as HashSet<int>;
+                            if (partido.es_playoff && seriesFinalizadas != null && seriesFinalizadas.Contains(partido.id))
+                            {
+                                <button class="btn-disabled" disabled>
+                                    <i class="fas fa-lock me-2"></i>Serie Decidida
+                                </button>
+                            }
+                            else
+                            {
+                                <a asp-action="JugarPartido" asp-route-id="@partido.id" class="btn-play">
+                                    <i class="fas fa-play me-2"></i>Jugar Partido
+                                </a>
+                            }
+                        }
+                        @if (partido.estado == "Cancelado")
+                        {
+                            <a asp-action="EditarPartido" asp-route-id="@partido.id" class="btn-edit">
+                                <i class="fas fa-edit me-2"></i>Editar Partido
+                            </a>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="no-matches fade-in-up">
+            <div class="no-matches-icon">🏀</div>
+            <h3>No hay partidos programados</h3>
+            <p>Esta jornada aún no tiene encuentros asignados.</p>
+        </div>
+    }
+</div>
+
+<!-- Font Awesome para los iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animaciones escalonadas
+        const elements = document.querySelectorAll('.fade-in-up');
+        elements.forEach((el, index) => {
+            el.style.animationDelay = `${index * 0.1}s`;
+        });
+
+        // Efectos interactivos para las tarjetas
+        const matchCards = document.querySelectorAll('.match-card');
+        matchCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0) scale(1)';
+            });
+        });
+
+        // Efecto de ripple en botones
+        const buttons = document.querySelectorAll('.btn-play, .btn-edit');
+        buttons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+                
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+                ripple.classList.add('ripple');
+                
+                this.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            });
+        });
+    });
+</script>
+
+<style>
+    .ripple {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.6);
+        transform: scale(0);
+        animation: ripple-animation 0.6s linear;
+        pointer-events: none;
+    }
+
+    @@keyframes ripple-animation {
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
+    }
+</style>

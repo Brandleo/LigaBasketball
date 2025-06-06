@@ -1,0 +1,164 @@
+﻿@{
+    // Obtiene el nombre del controlador actual
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BasketballLeagueApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BasketballLeagueApp.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
+    @RenderSection("Scrips", required: false)
+</head>
+<body>
+
+    @* Si NO estamos en "Administradores", mostrar el navbar *@
+    @if (!(currentController == "Verificacion" && (currentAction == "Index" || currentAction == "Autenticar")))
+    {
+        <header>
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-custom border-bottom box-shadow mb-0">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Verificacion" asp-action="Principal">BLAPP</a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Administradores
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+
+                                    @if (Context.Session.GetInt32("id") == 1)
+                                    {
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Administradores" asp-action="InfoAdmins">Administradores</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="Administradores" asp-action="Crear">Crear Administrador</a></li>
+                                    }
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Graficas
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                         
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Graficos" asp-action="Dashboard">Dashboard</a></li>
+
+
+                                </ul>
+                            </li>
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Reportes
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reportes" asp-action="Clasificacion">Clasificacion</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reportes" asp-action="EstadisticasJugadorPartido">Jugadores</a></li>
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Reportes" asp-action="CalendarioJornadas">Jornadas</a></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reportes" asp-action="ResultadosPorJornada">Resultados</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Reportes" asp-action="JugadoresDestacados">Destacados</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Partidos
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="Partidos" asp-action="ListarJornadas">Jornadas</a></li>
+                                 
+
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Jugadores
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="jugadores" asp-action="Index">Tabla Jugadores</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="jugadores" asp-action="Create">Ingresar Jugadores</a>
+                                    </li>
+
+                                </ul>
+                            </li>
+
+
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Entrenadores
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="entrenadores" asp-action="Index">Ver Entrenadores</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="entrenadores" asp-action="Create">Ingresar Entrenadores</a>
+                                    </li>
+
+                                </ul>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="dropdownMenu1" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Equipos
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="equipos" asp-action="Index">Equipos</a></li>>
+                                </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="temporadas" asp-action="Index">Temporada</a>
+                            </li>
+                            <li class="nav_item">
+                                <a class="nav-link text-danger" asp-controller="Verificacion" asp-action="Logout" >
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+    }
+
+    <div class="container-fluid p-0">
+        <main role="main" class="d-flex flex-column justify-content-center align-content-center">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="mt-auto bg-dark text-white text-center py-3">
+        <div class="container">
+            &copy; 2025 - BasketballLeagueApp 
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

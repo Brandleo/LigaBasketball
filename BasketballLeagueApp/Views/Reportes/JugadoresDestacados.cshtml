@@ -1,0 +1,72 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.ReporteJugadoresDestacadosVM
+
+@{
+    ViewData["Title"] = "Top 10 Jugadores Destacados";
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+}
+
+<div class="container">
+    <h2 class="mb-4 text-center">Top 10 Jugadores Destacados</h2>
+
+    <!-- Formulario de búsqueda -->
+    <form asp-action="JugadoresDestacados" method="post" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label asp-for="TemporadaSeleccionada" class="form-label">Temporada</label>
+            <select asp-for="TemporadaSeleccionada" asp-items="Model.Temporadas" class="form-select">
+                <option value="">Seleccione</option>
+            </select>
+        </div>
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </form>
+
+    <!-- Tabla de resultados -->
+    @if (Model.Jugadores != null && Model.Jugadores.Any())
+    {
+        <!-- Botón de exportar PDF -->
+        <form asp-action="ExportarJugadoresDestacadosPDF" method="post" class="mb-3" target="_blank">
+            <input type="hidden" name="TemporadaSeleccionada" value="@Model.TemporadaSeleccionada" />
+            <button type="submit" class="btn btn-danger">📄 Exportar PDF</button>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover shadow-sm">
+                <thead class="table-primary text-center">
+                    <tr>
+                        <th>#</th>
+                        <th>Jugador</th>
+                        <th>Equipo</th>
+                        <th>Puntos</th>
+                        <th>Rebotes</th>
+                        <th>Asistencias</th>
+                        <th>Faltas</th>
+                        <th>Minutos (Prom.)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < Model.Jugadores.Count && i < 10; i++)
+                    {
+                        var jugador = Model.Jugadores[i];
+                        <tr>
+                            <td class="text-center fw-bold">
+                                @(i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : (i + 1).ToString())
+                            </td>
+                            <td>@jugador.NombreJugador</td>
+                            <td>@jugador.Equipo</td>
+                            <td class="text-center">@jugador.TotalPuntos</td>
+                            <td class="text-center">@jugador.TotalRebotes</td>
+                            <td class="text-center">@jugador.TotalAsistencias</td>
+                            <td class="text-center">@jugador.TotalFaltas</td>
+                            <td class="text-center">@jugador.PromedioMinutos.ToString("0.0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else if (Model.TemporadaSeleccionada != null)
+    {
+        <div class="alert alert-warning mt-4">No se encontraron jugadores destacados para esta temporada.</div>
+    }
+</div>

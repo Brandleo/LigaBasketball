@@ -1,0 +1,459 @@
+﻿@model BasketballLeagueApp.Models.ViewModels.TemporadaCreateViewModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Crear Nueva Temporada";
+}
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-10 col-xl-8">
+            <!-- Header Section -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="icon-circle bg-primary text-white me-3">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1 fw-bold text-dark">Nueva Temporada</h2>
+                    <p class="text-muted mb-0">Configura una nueva temporada de la liga</p>
+                </div>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <!-- Alert Messages -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-times-circle me-2"></i>
+                            <strong>Por favor corrige los siguientes errores:</strong>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Create" method="post" id="temporadaForm">
+                        <!-- Step 1: Información Básica -->
+                        <div class="form-section mb-5">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center">
+                                    <span class="step-number">1</span>
+                                    <div class="ms-3">
+                                        <h5 class="mb-1 fw-semibold">Información Básica</h5>
+                                        <p class="text-muted mb-0 small">Define los datos principales de la temporada</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input asp-for="nombre" class="form-control form-control-lg" 
+                                               placeholder="Nombre de la temporada" id="nombreInput" />
+                                        <label for="nombreInput">
+                                            <i class="fas fa-tag me-2"></i>Nombre de la Temporada
+                                        </label>
+                                        <span asp-validation-for="nombre" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                @{
+                                    int anioInicio = 2025;
+                                    int anioLimite = DateTime.Now.Year + 3;
+                                }
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="anioInicio">
+                                            <i class="fas fa-calendar-alt me-2"></i>Año de Inicio
+                                        </label>
+                                        <select asp-for="anioInicio" class="form-select" id="anioInicio">
+                                            <option value="">Seleccione un año</option>
+                                            @for (int i = anioInicio; i <= anioLimite; i++)
+                                            {
+                                                <option value="@i" selected="@(Model.anioInicio == i)">
+                                                    @i
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="anioInicio" class="text-danger small"></span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="anioFin">
+                                            <i class="fas fa-calendar-check me-2"></i>Año de Finalización
+                                        </label>
+                                        <select asp-for="anioFin" class="form-select" id="anioFin">
+                                            <option value="">Seleccione un año</option>
+                                            @for (int i = anioInicio; i <= anioLimite; i++)
+                                            {
+                                                <option value="@i" selected="@(Model.anioFin == i)">
+                                                    @i
+                                                </option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="anioFin" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="date" name="fechaInicioCalendario" class="form-control" 
+                                               required id="fechaInicioInput" />
+                                        <label for="fechaInicioInput">
+                                            <i class="fas fa-calendar-plus me-2"></i>Fecha de Inicio del Calendario
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Selección de Equipos -->
+                        <div class="form-section mb-4">
+                            <div class="section-header mb-4">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <span class="step-number">2</span>
+                                        <div class="ms-3">
+                                            <h5 class="mb-1 fw-semibold">Equipos Participantes</h5>
+                                            <p class="text-muted mb-0 small">Selecciona exactamente 18 equipos para la temporada</p>
+                                        </div>
+                                    </div>
+                                    <div class="selection-counter">
+                                        <span class="badge badge-counter" id="contadorBadge">
+                                            <span id="contadorSeleccionados">0</span>/18
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search and Filter -->
+                            <div class="mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">
+                                        <i class="fas fa-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control border-start-0 ps-0" 
+                                           placeholder="Buscar equipos..." id="searchEquipos">
+                                </div>
+                            </div>
+
+                            <!-- Teams Grid -->
+                            <div class="teams-grid" id="teamsContainer">
+                                @foreach (var equipo in Model.EquiposActivos)
+                                {
+                                    <div class="team-card" data-team-name="@equipo.nombre.ToLower()">
+                                        <input class="team-checkbox" type="checkbox" 
+                                               name="EquiposSeleccionados" value="@equipo.id" 
+                                               id="equipo_@equipo.id" />
+                                        <label class="team-label" for="equipo_@equipo.id">
+                                            <div class="team-avatar">
+                                                <i class="fas fa-basketball-ball"></i>
+                                            </div>
+                                            <div class="team-info">
+                                                <div class="team-name">@equipo.nombre</div>
+                                                <div class="team-status">Activo</div>
+                                            </div>
+                                            <div class="check-icon">
+                                                <i class="fas fa-check"></i>
+                                            </div>
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Submit Section -->
+                        <div class="form-actions">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </button>
+                                <button type="submit" class="btn btn-success btn-lg px-4" id="submitBtn" disabled>
+                                    <i class="fas fa-plus-circle me-2"></i>Crear Temporada y Calendario
+                                </button>
+                            </div>
+                        </div>
+
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .icon-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .form-section {
+            position: relative;
+        }
+
+        .section-header {
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 1rem;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .form-floating > label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .badge-counter {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            border: 2px dashed #e9ecef;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .team-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .team-checkbox {
+            display: none;
+        }
+
+        .team-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            cursor: pointer;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+
+        .team-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .team-info {
+            flex: 1;
+        }
+
+        .team-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.25rem;
+        }
+
+        .team-status {
+            font-size: 0.85rem;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .check-icon {
+            opacity: 0;
+            color: #28a745;
+            font-size: 1.2rem;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+        }
+
+        .team-checkbox:checked + .team-label {
+            background: linear-gradient(135deg, #e8f5e8, #f0fff0);
+        }
+
+        .team-checkbox:checked + .team-label .team-card,
+        .team-checkbox:checked ~ .team-card {
+            border-color: #28a745;
+        }
+
+        .team-checkbox:checked + .team-label .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .team-checkbox:disabled + .team-label {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-actions {
+            background: #f8f9fa;
+            margin: -1.5rem -1.5rem -1.5rem -1.5rem;
+            padding: 1.5rem;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+        }
+
+        @@media (max-width: 768px) {
+            .teams-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions .d-flex {
+                flex-direction: column-reverse;
+                gap: 1rem;
+            }
+        }
+    </style>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const checkboxes = document.querySelectorAll('input[name="EquiposSeleccionados"]');
+            const contadorSpan = document.getElementById("contadorSeleccionados");
+            const contadorBadge = document.getElementById("contadorBadge");
+            const submitBtn = document.getElementById("submitBtn");
+            const searchInput = document.getElementById("searchEquipos");
+            const teamsContainer = document.getElementById("teamsContainer");
+
+            // Función para actualizar el contador
+            function updateCounter() {
+                const seleccionados = document.querySelectorAll('input[name="EquiposSeleccionados"]:checked').length;
+                contadorSpan.textContent = seleccionados;
+                
+                // Actualizar color del badge
+                if (seleccionados === 18) {
+                    contadorBadge.className = "badge badge-counter bg-success";
+                    submitBtn.disabled = false;
+                } else if (seleccionados > 18) {
+                    contadorBadge.className = "badge badge-counter bg-danger";
+                    submitBtn.disabled = true;
+                } else {
+                    contadorBadge.className = "badge badge-counter bg-primary";
+                    submitBtn.disabled = true;
+                }
+
+                // Deshabilitar checkboxes si se alcanza el límite
+                if (seleccionados >= 18) {
+                    checkboxes.forEach(cb => {
+                        if (!cb.checked) cb.disabled = true;
+                    });
+                } else {
+                    checkboxes.forEach(cb => cb.disabled = false);
+                }
+            }
+
+            // Event listeners para checkboxes
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", updateCounter);
+            });
+
+            // Funcionalidad de búsqueda
+            searchInput.addEventListener("input", function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const teamCards = document.querySelectorAll(".team-card");
+
+                teamCards.forEach(card => {
+                    const teamName = card.getAttribute("data-team-name");
+                    if (teamName.includes(searchTerm)) {
+                        card.style.display = "block";
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+            });
+
+            // Validación del formulario
+            document.getElementById("temporadaForm").addEventListener("submit", function(e) {
+                const seleccionados = document.querySelectorAll('input[name="EquiposSeleccionados"]:checked').length;
+                
+                if (seleccionados !== 18) {
+                    e.preventDefault();
+                    alert(`Debes seleccionar exactamente 18 equipos. Actualmente tienes ${seleccionados} seleccionados.`);
+                    return false;
+                }
+            });
+
+            // Inicializar contador
+            updateCounter();
+        });
+
+        document.getElementById("anioInicio").addEventListener("change", function () {
+            const inicio = parseInt(this.value);
+            const finSelect = document.getElementById("anioFin");
+
+            if (!isNaN(inicio)) {
+                const finValue = inicio + 1;
+                for (let option of finSelect.options) {
+                    option.selected = parseInt(option.value) === finValue;
+                }
+            }
+        });
+    </script>
+}
+

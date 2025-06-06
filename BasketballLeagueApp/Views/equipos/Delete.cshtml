@@ -1,0 +1,45 @@
+﻿@model BasketballLeagueApp.Models.equipos
+
+@{
+    Layout = "~/Views/Shared/_LayoutAdmins.cshtml";
+    ViewData["Title"] = "Eliminar Equipo";
+}
+
+<div class="card shadow mt-4">
+    <div class="card-header bg-danger text-white">
+        <h3 class="mb-0"><i class="fa fa-trash"></i> Eliminar Equipo</h3>
+    </div>
+
+    <div class="card-body">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["ErrorMessage"]
+            </div>
+        }
+
+        <h4>¿Está seguro de que desea eliminar el equipo?</h4>
+        <div>
+            <strong>Nombre del Equipo:</strong> @Model.nombre<br />
+            <strong>Sede:</strong> @Model.sede
+        </div>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="id" />
+            <button type="submit" class="btn btn-danger mt-3">
+                <i class="fa fa-trash"></i> Eliminar
+            </button>
+            <a asp-action="Index" class="btn btn-secondary mt-3">
+                <i class="fa fa-arrow-left"></i> Cancelar
+            </a>
+        </form>
+    </div>
+</div>
